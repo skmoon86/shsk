@@ -3,7 +3,12 @@
     "allow": [
       "Bash(npm run:*)",
       "Bash(pip install:*)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m ':*)",
+      "Bash(git push:*)",
+      "Bash(gh repo:*)",
+      "Bash(git reset:*)"
     ]
   }
 }
