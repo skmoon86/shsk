@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>식비기록 — 서비스 설명 자료</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800&display=swap');
+
+  :root {
+    --brand-50: #f0fdf4;
+    --brand-100: #dcfce7;
+    --brand-500: #22c55e;
+    --brand-600: #16a34a;
+    --brand-700: #15803d;
+    --surface-0: #ffffff;
+    --surface-50: #f8faf8;
+    --surface-100: #f0f4f0;
+    --surface-200: #e4ebe4;
+    --surface-800: #1e2a1e;
+    --surface-900: #141e14;
+    --cat-grocery: #22c55e;
+    --cat-dining: #f97316;
+    --cat-cafe: #a78bfa;
+    --cat-drink: #facc15;
+    --cat-etc: #94a3b8;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: #f3f4f6;
+    color: #1e2a1e;
+    line-height: 1.6;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* ── Layout ── */
+  .page {
+    max-width: 960px;
+    margin: 0 auto;
+    background: #fff;
+    min-height: 100vh;
+  }
+
+  .cover {
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 50%, #bbf7d0 100%);
+    padding: 100px 60px 80px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .cover::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: rgba(34,197,94,0.15);
+  }
+  .cover::after {
+    content: '';
+    position: absolute;
+    bottom: -40px; left: -40px;
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    background: rgba(34,197,94,0.1);
+  }
+  .cover-emoji { font-size: 64px; margin-bottom: 20px; }
+  .cover h1 { font-size: 42px; font-weight: 800; color: var(--surface-900); letter-spacing: -1px; }
+  .cover .subtitle { font-size: 18px; color: var(--surface-800); opacity: 0.6; margin-top: 8px; }
+  .cover .meta { margin-top: 40px; font-size: 14px; color: var(--surface-800); opacity: 0.4; }
+
+  .content { padding: 60px; }
+
+  /* ── Typography ── */
+  .section-title {
+    font-size: 22px; font-weight: 700;
+    color: var(--brand-700);
+    border-bottom: 3px solid var(--brand-500);
+    padding-bottom: 8px;
+    margin: 48px 0 24px;
+  }
+  .section-title:first-child { margin-top: 0; }
+
+  .sub-title {
+    font-size: 16px; font-weight: 600;
+    color: var(--surface-800);
+    margin: 28px 0 12px;
+  }
+
+  p { margin-bottom: 12px; font-size: 15px; color: #333; }
+
+  .bullet-list { list-style: none; padding: 0; }
+  .bullet-list li {
+    padding: 6px 0 6px 20px;
+    position: relative;
+    font-size: 15px;
+  }
+  .bullet-list li::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 14px;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--brand-500);
+  }
+
+  .highlight-box {
+    background: var(--brand-50);
+    border-left: 4px solid var(--brand-500);
+    border-radius: 0 12px 12px 0;
+    padding: 16px 20px;
+    margin: 16px 0;
+    font-size: 14px;
+    color: var(--brand-700);
+  }
+
+  /* ── Flow diagram ── */
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 16px 0;
+  }
+  .flow-step {
+    background: var(--surface-0);
+    border: 2px solid var(--brand-500);
+    border-radius: 12px;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--brand-700);
+    white-space: nowrap;
+  }
+  .flow-step.active {
+    background: var(--brand-500);
+    color: #fff;
+  }
+  .flow-arrow {
+    color: var(--brand-500);
+    font-size: 18px;
+    font-weight: bold;
+  }
+
+  /* ── Phone mockup ── */
+  .screen-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    margin: 30px 0;
+  }
+  .screen-item {
+    text-align: center;
+  }
+  .screen-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--surface-800);
+    margin-bottom: 12px;
+  }
+  .screen-desc {
+    font-size: 13px;
+    color: #666;
+    margin-top: 12px;
+    text-align: left;
+    line-height: 1.5;
+  }
+
+  .phone {
+    width: 260px;
+    margin: 0 auto;
+    background: var(--surface-50);
+    border-radius: 28px;
+    border: 3px solid #d1d5db;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    position: relative;
+  }
+  .phone-notch {
+    width: 80px;
+    height: 20px;
+    background: #d1d5db;
+    border-radius: 0 0 12px 12px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+  }
+  .phone-screen {
+    min-height: 420px;
+    background: var(--surface-50);
+    position: relative;
+  }
+  .phone-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 8px 4px 12px;
+    background: #fff;
+    border-top: 1px solid var(--surface-100);
+  }
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    font-size: 9px;
+    color: rgba(30,42,30,0.4);
+  }
+  .nav-item.active { color: var(--brand-600); font-weight: 600; }
+  .nav-icon { width: 18px; height: 18px; background: currentColor; border-radius: 4px; opacity: 0.5; }
+  .nav-item.active .nav-icon { opacity: 1; }
+  .nav-item.primary .nav-icon {
+    width: 36px; height: 36px;
+    background: var(--brand-500);
+    border-radius: 12px;
+    margin-top: -14px;
+    opacity: 1;
+  }
+
+  /* ── Screen inner styles ── */
+  .scr-pad { padding: 16px 14px; }
+  .scr-title { font-size: 17px; font-weight: 700; color: var(--surface-900); margin-bottom: 12px; }
+  .scr-label { font-size: 9px; font-weight: 600; color: rgba(30,42,30,0.4); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+
+  .scr-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 10px 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.06);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .scr-card-icon { font-size: 16px; }
+  .scr-card-text { flex: 1; font-size: 11px; color: var(--surface-800); }
+  .scr-card-sub { font-size: 9px; color: rgba(30,42,30,0.4); }
+  .scr-card-amount { font-size: 11px; font-weight: 700; color: var(--surface-900); white-space: nowrap; }
+
+  .scr-bar-track { width: 40px; height: 4px; background: var(--surface-100); border-radius: 4px; overflow: hidden; }
+  .scr-bar-fill { height: 100%; border-radius: 4px; }
+
+  .scr-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 4px 10px;
+    border-radius: 10px;
+    font-size: 9px;
+    margin-right: 4px;
+    margin-bottom: 4px;
+  }
+  .scr-pill.active { background: var(--brand-500); color: #fff; }
+  .scr-pill.inactive { background: var(--surface-100); color: rgba(30,42,30,0.5); }
+
+  /* Input field mock */
+  .scr-input {
+    background: #fff;
+    border: 1.5px solid var(--surface-200);
+    border-radius: 12px;
+    padding: 8px 10px;
+    font-size: 11px;
+    color: #999;
+    margin-bottom: 8px;
+    width: 100%;
+  }
+  .scr-input.amount {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--surface-900);
+    text-align: right;
+  }
+  .scr-btn {
+    background: var(--brand-500);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 10px;
+    width: 100%;
+    font-size: 12px;
+    font-weight: 700;
+    margin-top: 8px;
+  }
+
+  /* Chart mocks */
+  .pie-mock {
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    margin: 8px auto;
+    background: conic-gradient(
+      var(--cat-grocery) 0% 40%,
+      var(--cat-dining) 40% 65%,
+      var(--cat-cafe) 65% 80%,
+      var(--cat-drink) 80% 92%,
+      var(--cat-etc) 92% 100%
+    );
+    position: relative;
+  }
+  .pie-mock::after {
+    content: '';
+    position: absolute;
+    top: 25%; left: 25%;
+    width: 50%; height: 50%;
+    background: #fff;
+    border-radius: 50%;
+  }
+
+  .bar-chart-mock {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    height: 70px;
+    padding: 0 8px;
+    margin: 8px 0;
+  }
+  .bar-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .bar-fill {
+    width: 100%;
+    background: var(--brand-500);
+    border-radius: 6px 6px 0 0;
+    min-height: 4px;
+  }
+  .bar-label { font-size: 8px; color: rgba(30,42,30,0.4); }
+
+  /* ── Tables ── */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0 20px;
+    font-size: 14px;
+  }
+  .data-table th {
+    background: var(--brand-700);
+    color: #fff;
+    padding: 10px 14px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 13px;
+  }
+  .data-table th:first-child { border-radius: 8px 0 0 0; }
+  .data-table th:last-child { border-radius: 0 8px 0 0; }
+  .data-table td {
+    padding: 9px 14px;
+    border-bottom: 1px solid #eee;
+  }
+  .data-table tr:nth-child(even) { background: #f9fafb; }
+  .data-table tr:last-child td:first-child { border-radius: 0 0 0 8px; }
+  .data-table tr:last-child td:last-child { border-radius: 0 0 8px 0; }
+  .data-table .num { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .data-table .center { text-align: center; }
+  .data-table tr.total-row { background: var(--brand-50); font-weight: 700; }
+
+  /* ── Status badges ── */
+  .badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .badge-done { background: var(--brand-100); color: var(--brand-700); }
+  .badge-todo { background: #fef3c7; color: #92400e; }
+
+  .feature-list {
+    list-style: none;
+    padding: 0;
+    columns: 2;
+    gap: 16px;
+  }
+  .feature-list li {
+    padding: 8px 0;
+    font-size: 14px;
+    break-inside: avoid;
+  }
+
+  .category-dot {
+    display: inline-block;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+
+  /* ── Print ── */
+  @media print {
+    body { background: #fff; }
+    .page { box-shadow: none; }
+    .content { padding: 40px; }
+    .page-break { page-break-before: always; }
+  }
+
+  .toc {
+    background: var(--surface-50);
+    border-radius: 16px;
+    padding: 28px 32px;
+    margin: 24px 0 40px;
+  }
+  .toc-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px dotted #ddd;
+    font-size: 15px;
+  }
+  .toc-item:last-child { border-bottom: none; }
+  .toc-num { color: var(--brand-500); font-weight: 700; margin-right: 12px; }
+
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin: 16px 0;
+  }
+  .summary-card {
+    background: var(--surface-50);
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+  }
+  .summary-card .num { font-size: 28px; font-weight: 800; color: var(--brand-600); }
+  .summary-card .label { font-size: 13px; color: #888; margin-top: 4px; }
+
+  /* Login screen special */
+  .login-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 420px;
+    padding: 40px 20px;
+    text-align: center;
+  }
+  .login-emoji { font-size: 36px; margin-bottom: 8px; }
+  .login-title { font-size: 20px; font-weight: 700; color: var(--surface-900); }
+  .login-sub { font-size: 10px; color: rgba(30,42,30,0.4); margin: 4px 0 24px; }
+  .google-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: #fff;
+    border: 1.5px solid var(--surface-200);
+    border-radius: 12px;
+    padding: 10px 20px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--surface-800);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    width: 100%;
+    max-width: 180px;
+  }
+  .google-icon {
+    width: 16px; height: 16px;
+    background: conic-gradient(from 180deg, #EA4335 0% 25%, #FBBC05 25% 50%, #34A853 50% 75%, #4285F4 75% 100%);
+    border-radius: 50%;
+  }
+
+  /* Onboarding */
+  .onboard-tabs {
+    display: flex;
+    gap: 2px;
+    background: var(--surface-100);
+    border-radius: 10px;
+    padding: 2px;
+    margin-bottom: 12px;
+  }
+  .onboard-tab {
+    flex: 1;
+    text-align: center;
+    padding: 6px;
+    border-radius: 8px;
+    font-size: 9px;
+    font-weight: 600;
+  }
+  .onboard-tab.active { background: #fff; color: var(--surface-900); box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .onboard-tab.inactive { color: rgba(30,42,30,0.35); }
+
+  /* Settings */
+  .scr-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #fff;
+    border-radius: 16px;
+    padding: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    margin-bottom: 10px;
+  }
+  .scr-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--brand-100);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--brand-600);
+  }
+  .scr-invite-code {
+    background: var(--surface-50);
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-family: monospace;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    color: var(--surface-900);
+    text-align: center;
+  }
+  .scr-logout-btn {
+    border: 1.5px solid #fca5a5;
+    background: #fff;
+    border-radius: 12px;
+    padding: 10px;
+    width: 100%;
+    font-size: 11px;
+    font-weight: 600;
+    color: #ef4444;
+    margin-top: 8px;
+  }
+
+  .screen-grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 30px;
+    margin: 30px 0;
+  }
+  .screen-grid-3 .phone {
+    width: 220px;
+  }
+  .screen-grid-3 .phone-screen {
+    min-height: 360px;
+  }
+
+  .page-break { margin-top: 40px; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ══════ COVER ══════ -->
+  <div class="cover">
+    <div class="cover-emoji">🍚</div>
+    <h1>식비기록</h1>
+    <div class="subtitle">가족/커플 식비 가계부 앱</div>
+    <div class="meta">
+      서비스 설명 자료 &middot; 2026년 4월<br>
+      Version 1.0
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- TOC -->
+    <div class="toc">
+      <div class="toc-item"><span><span class="toc-num">01</span>서비스 소개</span></div>
+      <div class="toc-item"><span><span class="toc-num">02</span>사용자 흐름</span></div>
+      <div class="toc-item"><span><span class="toc-num">03</span>화면별 상세 설명 (스크린샷)</span></div>
+      <div class="toc-item"><span><span class="toc-num">04</span>샘플 데이터</span></div>
+      <div class="toc-item"><span><span class="toc-num">05</span>구현 현황 및 로드맵</span></div>
+    </div>
+
+    <!-- ══════ 1. 서비스 소개 ══════ -->
+    <h2 class="section-title">1. 서비스 소개</h2>
+
+    <p><strong>식비기록</strong>은 가족 또는 커플이 함께 사용하는 <strong>식비 전용 가계부</strong> 앱입니다.
+    구글 로그인 한 번이면 바로 시작할 수 있으며, 초대 코드를 공유해 같은 그룹으로 묶여 식비를 함께 기록하고 관리합니다.</p>
+
+    <div class="summary-grid">
+      <div class="summary-card">
+        <div class="num">1</div>
+        <div class="label">클릭으로 로그인<br>(구글 OAuth)</div>
+      </div>
+      <div class="summary-card">
+        <div class="num">6</div>
+        <div class="label">자리 초대코드로<br>그룹 참여</div>
+      </div>
+      <div class="summary-card">
+        <div class="num">5</div>
+        <div class="label">개 기본 카테고리<br>자동 생성</div>
+      </div>
+    </div>
+
+    <h3 class="sub-title">핵심 특징</h3>
+    <ul class="bullet-list">
+      <li>구글 계정으로 간편 로그인 (별도 회원가입 불필요)</li>
+      <li>초대 코드 한 줄로 가족/커플 그룹 연결</li>
+      <li>누가 입력했는지 구분하지 않는 <strong>공동 장부</strong> 컨셉</li>
+      <li>카테고리별 지출 분석 및 월별 통계 차트</li>
+      <li>영수증 사진 첨부 기능</li>
+      <li>상세 품목 입력 및 구매 내역 펼쳐보기</li>
+      <li>품목 클릭 시 과거 구매 내역 조회 (가격 추이, 평균/최저/최고가)</li>
+      <li>모바일 최적화 UI (하단 탭 네비게이션)</li>
+    </ul>
+
+    <!-- ══════ 2. 사용자 흐름 ══════ -->
+    <h2 class="section-title">2. 사용자 흐름</h2>
+
+    <h3 class="sub-title">2-1. 최초 가입 흐름</h3>
+    <div class="flow">
+      <div class="flow-step active">구글 로그인</div>
+      <span class="flow-arrow">&rarr;</span>
+      <div class="flow-step">OAuth 콜백</div>
+      <span class="flow-arrow">&rarr;</span>
+      <div class="flow-step">그룹 유무 확인</div>
+      <span class="flow-arrow">&rarr;</span>
+      <div class="flow-step" style="border-style: dashed;">그룹 생성<br><small>or 초대코드 입력</small></div>
+      <span class="flow-arrow">&rarr;</span>
+      <div class="flow-step active">대시보드</div>
+    </div>
+
+    <h3 class="sub-title">2-2. 그룹 생성 시 자동 처리</h3>
+    <div class="highlight-box">
+      그룹 생성 &rarr; 초대 코드 자동 생성 &rarr; 멤버십(owner) 등록 &rarr; 기본 카테고리 5개 자동 삽입<br>
+      <strong>기본 카테고리:</strong> 식재료 / 배달&middot;외식 / 카페&middot;간식 / 술&middot;회식 / 기타
+    </div>
+
+    <h3 class="sub-title">2-3. 일상 사용 흐름</h3>
+    <div class="flow">
+      <div class="flow-step active">대시보드<br><small>이번 달 현황</small></div>
+      <span class="flow-arrow">&rarr;</span>
+      <div class="flow-step">지출 입력</div>
+      <span class="flow-arrow">&rarr;</span>
+      <div class="flow-step">내역 확인<br><small>필터 &middot; 삭제</small></div>
+      <span class="flow-arrow">&rarr;</span>
+      <div class="flow-step">품목 클릭<br><small>과거 가격 조회</small></div>
+      <span class="flow-arrow">&rarr;</span>
+      <div class="flow-step">통계 분석<br><small>차트 확인</small></div>
+    </div>
+
+    <!-- ══════ 3. 화면별 상세 ══════ -->
+    <div class="page-break"></div>
+    <h2 class="section-title">3. 화면별 상세 설명</h2>
+
+    <!-- 3-1 로그인 + 온보딩 -->
+    <h3 class="sub-title">3-1. 로그인 / 온보딩</h3>
+
+    <div class="screen-grid">
+      <!-- Login -->
+      <div class="screen-item">
+        <div class="screen-label">로그인 화면</div>
+        <div class="phone">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <div class="login-screen">
+              <div class="login-emoji">🍚</div>
+              <div class="login-title">식비기록</div>
+              <div class="login-sub">우리 가족 식비를 함께 기록해요</div>
+              <div class="google-btn">
+                <div class="google-icon"></div>
+                Google로 시작하기
+              </div>
+              <div style="font-size:8px; color:rgba(30,42,30,0.25); margin-top:16px;">로그인하면 다른 멤버와 식비를 공유할 수 있어요</div>
+            </div>
+          </div>
+        </div>
+        <div class="screen-desc">
+          별도 회원가입 없이 구글 계정으로 원클릭 로그인합니다.
+          깔끔한 중앙 정렬 레이아웃으로 진입 장벽을 낮췄습니다.
+        </div>
+      </div>
+
+      <!-- Onboarding -->
+      <div class="screen-item">
+        <div class="screen-label">온보딩 (그룹 설정)</div>
+        <div class="phone">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <div class="login-screen" style="justify-content: flex-start; padding-top: 50px;">
+              <div style="font-size:28px; margin-bottom:4px;">🍽️</div>
+              <div style="font-size:16px; font-weight:700; margin-bottom:2px;">가계부 설정</div>
+              <div style="font-size:9px; color:rgba(30,42,30,0.4); margin-bottom:16px;">새로 만들거나 초대 코드로 참여하세요</div>
+              <div style="width: 85%;">
+                <div class="onboard-tabs">
+                  <div class="onboard-tab active">새로 만들기</div>
+                  <div class="onboard-tab inactive">초대 코드로 참여</div>
+                </div>
+                <div class="scr-input" style="color:#bbb;">가계부 이름 (예: 우리집 식비)</div>
+                <div class="scr-btn">가계부 만들기</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="screen-desc">
+          최초 로그인 후 그룹이 없으면 이 화면으로 이동합니다.
+          "새로 만들기" 또는 "초대 코드로 참여" 탭을 선택합니다.
+        </div>
+      </div>
+    </div>
+
+    <!-- 3-2 대시보드 + 지출입력 -->
+    <div class="page-break"></div>
+    <h3 class="sub-title">3-2. 대시보드 / 지출 입력</h3>
+
+    <div class="screen-grid">
+      <!-- Dashboard -->
+      <div class="screen-item">
+        <div class="screen-label">대시보드 (홈)</div>
+        <div class="phone">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <div class="scr-pad">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px;">
+                <div>
+                  <div class="scr-label">4월 식비</div>
+                  <div style="font-size:24px; font-weight:800; color:var(--surface-900);">439,700원</div>
+                </div>
+                <div style="font-size:24px;">🍚</div>
+              </div>
+
+              <div class="scr-label">카테고리별</div>
+              <div class="scr-card">
+                <span class="scr-card-icon">🛒</span>
+                <span class="scr-card-text">식재료</span>
+                <span class="scr-card-amount">203,300원</span>
+                <div class="scr-bar-track"><div class="scr-bar-fill" style="width:46%; background:var(--cat-grocery);"></div></div>
+              </div>
+              <div class="scr-card">
+                <span class="scr-card-icon">🍜</span>
+                <span class="scr-card-text">배달/외식</span>
+                <span class="scr-card-amount">128,000원</span>
+                <div class="scr-bar-track"><div class="scr-bar-fill" style="width:29%; background:var(--cat-dining);"></div></div>
+              </div>
+              <div class="scr-card">
+                <span class="scr-card-icon">☕</span>
+                <span class="scr-card-text">카페/간식</span>
+                <span class="scr-card-amount">72,400원</span>
+                <div class="scr-bar-track"><div class="scr-bar-fill" style="width:16%; background:var(--cat-cafe);"></div></div>
+              </div>
+
+              <div style="display:flex; justify-content:space-between; align-items:center; margin:12px 0 6px;">
+                <div class="scr-label" style="margin:0;">최근 지출</div>
+                <div style="font-size:9px; color:var(--brand-500);">전체 보기</div>
+              </div>
+              <div class="scr-card">
+                <span class="scr-card-icon">🛒</span>
+                <div style="flex:1;">
+                  <div class="scr-card-text">이마트 장보기</div>
+                  <div class="scr-card-sub">4.5</div>
+                </div>
+                <span class="scr-card-amount">52,100원</span>
+              </div>
+              <div class="scr-card">
+                <span class="scr-card-icon">🍜</span>
+                <div style="flex:1;">
+                  <div class="scr-card-text">주말 브런치</div>
+                  <div class="scr-card-sub">4.3</div>
+                </div>
+                <span class="scr-card-amount">41,000원</span>
+              </div>
+            </div>
+          </div>
+          <div class="phone-nav">
+            <div class="nav-item active"><div class="nav-icon"></div>홈</div>
+            <div class="nav-item"><div class="nav-icon"></div>내역</div>
+            <div class="nav-item primary"><div class="nav-icon"></div></div>
+            <div class="nav-item"><div class="nav-icon"></div>통계</div>
+            <div class="nav-item"><div class="nav-icon"></div>설정</div>
+          </div>
+        </div>
+        <div class="screen-desc">
+          이번 달 총 지출, 카테고리별 비중 막대, 최근 지출 5건을 한눈에 보여줍니다.
+        </div>
+      </div>
+
+      <!-- Add Expense -->
+      <div class="screen-item">
+        <div class="screen-label">지출 입력</div>
+        <div class="phone">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <div class="scr-pad">
+              <div class="scr-title">지출 입력</div>
+
+              <div class="scr-label">금액</div>
+              <div class="scr-input amount" style="display:flex; align-items:center; justify-content:flex-end; gap:4px;">
+                32,000 <span style="font-size:11px; font-weight:400; color:#999;">원</span>
+              </div>
+
+              <div class="scr-label">카테고리</div>
+              <div style="margin-bottom:8px;">
+                <span class="scr-pill inactive">🛒 식재료</span>
+                <span class="scr-pill active">🍜 배달/외식</span>
+                <span class="scr-pill inactive">☕ 카페/간식</span>
+                <span class="scr-pill inactive">🍺 술/회식</span>
+                <span class="scr-pill inactive">📦 기타</span>
+              </div>
+
+              <div class="scr-label">날짜</div>
+              <div class="scr-input">2026-04-07</div>
+
+              <div style="font-size:10px; font-weight:600; color:rgba(30,42,30,0.35); margin-bottom:8px;">
+                📋 상세 품목 추가
+              </div>
+
+              <div class="scr-label">메모</div>
+              <div class="scr-input">가족 외식 (한식당)</div>
+
+              <div class="scr-label">영수증 사진</div>
+              <div class="scr-input" style="display:flex; align-items:center; gap:4px; color:#bbb; border-style:dashed;">
+                📷 사진 첨부
+              </div>
+
+              <div class="scr-btn">저장하기</div>
+            </div>
+          </div>
+          <div class="phone-nav">
+            <div class="nav-item"><div class="nav-icon"></div>홈</div>
+            <div class="nav-item"><div class="nav-icon"></div>내역</div>
+            <div class="nav-item primary"><div class="nav-icon"></div></div>
+            <div class="nav-item"><div class="nav-icon"></div>통계</div>
+            <div class="nav-item"><div class="nav-icon"></div>설정</div>
+          </div>
+        </div>
+        <div class="screen-desc">
+          금액, 카테고리(탭 선택), 날짜, 메모, 영수증 사진을 입력합니다.
+          상세 품목 추가 시 항목별 금액이 자동 합산됩니다.
+        </div>
+      </div>
+    </div>
+
+    <!-- 3-3 내역 + 통계 -->
+    <div class="page-break"></div>
+    <h3 class="sub-title">3-3. 지출 내역 / 통계</h3>
+
+    <div class="screen-grid">
+      <!-- History -->
+      <div class="screen-item">
+        <div class="screen-label">지출 내역</div>
+        <div class="phone">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <div class="scr-pad">
+              <div class="scr-title">지출 내역</div>
+
+              <!-- Filter pills -->
+              <div style="margin-bottom:8px; overflow:hidden;">
+                <span class="scr-pill active">전체</span>
+                <span class="scr-pill inactive">🛒 식재료</span>
+                <span class="scr-pill inactive">🍜 배달/외식</span>
+                <span class="scr-pill inactive">☕ 카페</span>
+              </div>
+              <div style="display:flex; gap:4px; margin-bottom:10px;">
+                <div class="scr-input" style="flex:1; font-size:9px; margin:0; padding:6px 8px;">2026-03-01</div>
+                <span style="font-size:10px; color:#ccc; align-self:center;">~</span>
+                <div class="scr-input" style="flex:1; font-size:9px; margin:0; padding:6px 8px;">2026-04-07</div>
+              </div>
+
+              <!-- Total -->
+              <div style="background:var(--brand-50); border-radius:12px; padding:8px 12px; display:flex; justify-content:space-between; margin-bottom:10px;">
+                <span style="font-size:11px; color:var(--brand-700);">합계</span>
+                <span style="font-size:12px; font-weight:700; color:var(--brand-700);">439,700원</span>
+              </div>
+
+              <!-- Day group -->
+              <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                <span style="font-size:9px; font-weight:600; color:rgba(30,42,30,0.35);">3월 25일 (수)</span>
+                <span style="font-size:9px; color:rgba(30,42,30,0.35);">52,100원</span>
+              </div>
+              <!-- Expanded item with detail items -->
+              <div style="background:#fff; border-radius:12px; box-shadow:0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.06); margin-bottom:8px; overflow:hidden;">
+                <div style="display:flex; align-items:center; gap:8px; padding:10px 12px;">
+                  <span class="scr-card-icon">🛒</span>
+                  <div style="flex:1; display:flex; align-items:center; gap:4px;">
+                    <span class="scr-card-text">이마트 장보기</span>
+                    <span style="font-size:7px; background:var(--brand-50); color:var(--brand-500); border-radius:8px; padding:1px 5px; font-weight:600;">3개 품목</span>
+                  </div>
+                  <span style="font-size:10px; color:var(--brand-500);">&#9650;</span>
+                  <span class="scr-card-amount">52,100원</span>
+                </div>
+                <!-- Expanded detail items -->
+                <div style="padding:6px 12px 10px; margin-left:28px; border-top:1px solid var(--surface-100);">
+                  <div style="display:flex; justify-content:space-between; padding:3px 0; font-size:9px;">
+                    <span style="color:rgba(30,42,30,0.6);">삼겹살 600g</span>
+                    <span style="font-weight:600; color:rgba(30,42,30,0.6);">18,900원</span>
+                  </div>
+                  <div style="display:flex; justify-content:space-between; padding:3px 0; font-size:9px;">
+                    <span style="color:rgba(30,42,30,0.6);">양파/대파</span>
+                    <span style="font-weight:600; color:rgba(30,42,30,0.6);">5,200원</span>
+                  </div>
+                  <div style="display:flex; justify-content:space-between; padding:3px 0; font-size:9px;">
+                    <span style="color:rgba(30,42,30,0.6);">우유/계란</span>
+                    <span style="font-weight:600; color:rgba(30,42,30,0.6);">28,000원</span>
+                  </div>
+                  <div style="display:flex; justify-content:space-between; padding:5px 0 0; margin-top:3px; border-top:1px solid var(--surface-100); font-size:9px;">
+                    <span style="color:rgba(30,42,30,0.35);">합계</span>
+                    <span style="font-weight:700; color:var(--surface-900);">52,100원</span>
+                  </div>
+                </div>
+              </div>
+
+              <div style="display:flex; justify-content:space-between; margin-bottom:4px; margin-top:8px;">
+                <span style="font-size:9px; font-weight:600; color:rgba(30,42,30,0.35);">3월 22일 (일)</span>
+                <span style="font-size:9px; color:rgba(30,42,30,0.35);">24,000원</span>
+              </div>
+              <div class="scr-card">
+                <span class="scr-card-icon">🍜</span>
+                <div style="flex:1;"><div class="scr-card-text">중식 배달</div></div>
+                <span class="scr-card-amount">24,000원</span>
+              </div>
+
+              <div style="display:flex; justify-content:space-between; margin-bottom:4px; margin-top:8px;">
+                <span style="font-size:9px; font-weight:600; color:rgba(30,42,30,0.35);">3월 20일 (금)</span>
+                <span style="font-size:9px; color:rgba(30,42,30,0.35);">12,600원</span>
+              </div>
+              <div class="scr-card">
+                <span class="scr-card-icon">☕</span>
+                <div style="flex:1;">
+                  <div style="display:flex; align-items:center; gap:4px;">
+                    <span class="scr-card-text">투썸플레이스</span>
+                    <span style="font-size:7px; background:var(--brand-50); color:var(--brand-500); border-radius:8px; padding:1px 5px; font-weight:600;">2개 품목</span>
+                  </div>
+                </div>
+                <span style="font-size:10px; color:rgba(30,42,30,0.3);">&#9660;</span>
+                <span class="scr-card-amount">12,600원</span>
+              </div>
+            </div>
+          </div>
+          <div class="phone-nav">
+            <div class="nav-item"><div class="nav-icon"></div>홈</div>
+            <div class="nav-item active"><div class="nav-icon"></div>내역</div>
+            <div class="nav-item primary"><div class="nav-icon"></div></div>
+            <div class="nav-item"><div class="nav-icon"></div>통계</div>
+            <div class="nav-item"><div class="nav-icon"></div>설정</div>
+          </div>
+        </div>
+        <div class="screen-desc">
+          날짜별로 그룹핑된 지출 목록입니다. 상단에서 카테고리 필터와 기간 필터를 적용할 수 있으며,
+          항목에 마우스를 올리면 삭제 버튼이 나타납니다.
+          상세 품목이 있는 항목은 <strong>"N개 품목"</strong> 배지가 표시되며, 클릭하면 구매 품목과 개별 금액이 펼쳐집니다.
+          펼쳐진 품목명을 클릭하면 해당 품목의 <strong>과거 구매 내역 화면</strong>으로 이동합니다.
+        </div>
+      </div>
+
+      <!-- Item History -->
+      <div class="screen-item">
+        <div class="screen-label">품목 과거 구매 내역</div>
+        <div class="phone">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <div class="scr-pad">
+              <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+                <div style="font-size:14px; color:var(--surface-800);">&larr;</div>
+                <div>
+                  <div style="font-size:15px; font-weight:700; color:var(--surface-900);">삼겹살 600g</div>
+                  <div style="font-size:8px; color:rgba(30,42,30,0.35);">과거 구매 내역</div>
+                </div>
+              </div>
+
+              <!-- Stats card -->
+              <div style="background:var(--brand-50); border-radius:16px; padding:12px; margin-bottom:12px;">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                  <div>
+                    <div style="font-size:8px; color:var(--brand-600); opacity:0.6;">총 구매</div>
+                    <div style="font-size:14px; font-weight:700; color:var(--brand-700);">5회</div>
+                  </div>
+                  <div>
+                    <div style="font-size:8px; color:var(--brand-600); opacity:0.6;">평균 가격</div>
+                    <div style="font-size:14px; font-weight:700; color:var(--brand-700);">17,840원</div>
+                  </div>
+                  <div>
+                    <div style="font-size:8px; color:var(--brand-600); opacity:0.6;">최저가</div>
+                    <div style="font-size:13px; font-weight:600; color:#16a34a;">15,900원</div>
+                  </div>
+                  <div>
+                    <div style="font-size:8px; color:var(--brand-600); opacity:0.6;">최고가</div>
+                    <div style="font-size:13px; font-weight:600; color:#ef4444;">19,800원</div>
+                  </div>
+                </div>
+                <div style="border-top:1px solid rgba(34,197,94,0.2); margin-top:8px; padding-top:6px; display:flex; align-items:center; gap:4px;">
+                  <span style="font-size:10px; color:#ef4444;">&#9650;</span>
+                  <span style="font-size:9px; color:var(--brand-700);">지난번보다 1,100원 올랐어요</span>
+                </div>
+              </div>
+
+              <div style="font-size:11px; font-weight:600; color:rgba(30,42,30,0.45); margin-bottom:6px;">구매 이력</div>
+              <div class="scr-card">
+                <span class="scr-card-icon">🛒</span>
+                <div style="flex:1;">
+                  <div class="scr-card-text">이마트 장보기</div>
+                  <div style="font-size:8px; color:rgba(30,42,30,0.35);">2026.3.25 (수)</div>
+                </div>
+                <span class="scr-card-amount">18,900원</span>
+              </div>
+              <div class="scr-card">
+                <span class="scr-card-icon">🛒</span>
+                <div style="flex:1;">
+                  <div class="scr-card-text">코스트코 장보기</div>
+                  <div style="font-size:8px; color:rgba(30,42,30,0.35);">2026.3.8 (일)</div>
+                </div>
+                <span class="scr-card-amount">17,800원</span>
+              </div>
+              <div class="scr-card">
+                <span class="scr-card-icon">🛒</span>
+                <div style="flex:1;">
+                  <div class="scr-card-text">동네 마트</div>
+                  <div style="font-size:8px; color:rgba(30,42,30,0.35);">2026.2.20 (금)</div>
+                </div>
+                <span class="scr-card-amount">15,900원</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="screen-desc">
+          지출 내역에서 품목명을 클릭하면 해당 품목의 과거 구매 기록을 모아볼 수 있습니다.
+          총 구매 횟수, 평균/최저/최고 가격이 한눈에 표시되며,
+          직전 구매 대비 가격 변동(올랐어요/내렸어요)도 확인할 수 있습니다.
+        </div>
+      </div>
+    </div>
+
+      <!-- Stats -->
+      <div class="screen-item">
+        <div class="screen-label">통계</div>
+        <div class="phone">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <div class="scr-pad">
+              <div class="scr-title">통계</div>
+
+              <!-- Period tabs -->
+              <div class="onboard-tabs" style="margin-bottom:10px;">
+                <div class="onboard-tab active">이번 달</div>
+                <div class="onboard-tab inactive">지난 달</div>
+                <div class="onboard-tab inactive">3개월</div>
+              </div>
+
+              <!-- Total card -->
+              <div style="background:#fff; border-radius:16px; padding:12px; box-shadow:0 1px 3px rgba(0,0,0,0.06); text-align:center; margin-bottom:10px;">
+                <div style="font-size:9px; color:rgba(30,42,30,0.4);">총 지출</div>
+                <div style="font-size:22px; font-weight:800; color:var(--surface-900);">439,700원</div>
+              </div>
+
+              <!-- Pie chart -->
+              <div style="background:#fff; border-radius:16px; padding:12px; box-shadow:0 1px 3px rgba(0,0,0,0.06); margin-bottom:10px;">
+                <div class="scr-label">카테고리별 비율</div>
+                <div class="pie-mock"></div>
+                <div style="font-size:9px; margin-top:6px;">
+                  <div style="display:flex; align-items:center; gap:4px; padding:2px 0;">
+                    <span class="category-dot" style="background:var(--cat-grocery);"></span>식재료 <span style="margin-left:auto; font-weight:600;">203,300원</span> <span style="color:#999; width:28px; text-align:right;">46%</span>
+                  </div>
+                  <div style="display:flex; align-items:center; gap:4px; padding:2px 0;">
+                    <span class="category-dot" style="background:var(--cat-dining);"></span>배달/외식 <span style="margin-left:auto; font-weight:600;">128,000원</span> <span style="color:#999; width:28px; text-align:right;">29%</span>
+                  </div>
+                  <div style="display:flex; align-items:center; gap:4px; padding:2px 0;">
+                    <span class="category-dot" style="background:var(--cat-cafe);"></span>카페/간식 <span style="margin-left:auto; font-weight:600;">72,400원</span> <span style="color:#999; width:28px; text-align:right;">16%</span>
+                  </div>
+                  <div style="display:flex; align-items:center; gap:4px; padding:2px 0;">
+                    <span class="category-dot" style="background:var(--cat-drink);"></span>술/회식 <span style="margin-left:auto; font-weight:600;">22,400원</span> <span style="color:#999; width:28px; text-align:right;">5%</span>
+                  </div>
+                  <div style="display:flex; align-items:center; gap:4px; padding:2px 0;">
+                    <span class="category-dot" style="background:var(--cat-etc);"></span>기타 <span style="margin-left:auto; font-weight:600;">13,600원</span> <span style="color:#999; width:28px; text-align:right;">3%</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Bar chart -->
+              <div style="background:#fff; border-radius:16px; padding:12px; box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+                <div class="scr-label">월별 지출</div>
+                <div class="bar-chart-mock">
+                  <div class="bar-col"><div class="bar-fill" style="height:45px;"></div><div class="bar-label">2월</div></div>
+                  <div class="bar-col"><div class="bar-fill" style="height:60px;"></div><div class="bar-label">3월</div></div>
+                  <div class="bar-col"><div class="bar-fill" style="height:50px;"></div><div class="bar-label">4월</div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="phone-nav">
+            <div class="nav-item"><div class="nav-icon"></div>홈</div>
+            <div class="nav-item"><div class="nav-icon"></div>내역</div>
+            <div class="nav-item primary"><div class="nav-icon"></div></div>
+            <div class="nav-item active"><div class="nav-icon"></div>통계</div>
+            <div class="nav-item"><div class="nav-icon"></div>설정</div>
+          </div>
+        </div>
+        <div class="screen-desc">
+          도넛 파이 차트로 카테고리별 비율을, 바 차트로 월별 추이를 시각화합니다.
+          기간 탭(이번 달/지난 달/3개월)으로 범위를 전환합니다.
+        </div>
+      </div>
+    </div>
+
+    <!-- 3-4 설정 -->
+    <div class="page-break"></div>
+    <h3 class="sub-title">3-4. 설정</h3>
+
+    <div class="screen-grid">
+      <div class="screen-item">
+        <div class="screen-label">설정 화면</div>
+        <div class="phone">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <div class="scr-pad">
+              <div class="scr-title">설정</div>
+
+              <!-- Profile -->
+              <div class="scr-profile">
+                <div class="scr-avatar">문</div>
+                <div>
+                  <div style="font-size:12px; font-weight:600;">문상경</div>
+                  <div style="font-size:9px; color:rgba(30,42,30,0.4);">sangkyung@gmail.com</div>
+                </div>
+              </div>
+
+              <!-- Household -->
+              <div style="background:#fff; border-radius:16px; padding:14px; box-shadow:0 1px 3px rgba(0,0,0,0.06); margin-bottom:10px;">
+                <div class="scr-label">가계부 그룹</div>
+                <div style="font-size:14px; font-weight:700; margin-bottom:8px;">우리집 밥상</div>
+                <div style="font-size:8px; color:rgba(30,42,30,0.35); margin-bottom:6px;">초대 코드 — 이 코드를 공유하면 같이 기록할 수 있어요</div>
+                <div class="scr-invite-code">X7K2MP</div>
+              </div>
+
+              <!-- Logout -->
+              <div class="scr-logout-btn" style="text-align:center;">🚪 로그아웃</div>
+            </div>
+          </div>
+          <div class="phone-nav">
+            <div class="nav-item"><div class="nav-icon"></div>홈</div>
+            <div class="nav-item"><div class="nav-icon"></div>내역</div>
+            <div class="nav-item primary"><div class="nav-icon"></div></div>
+            <div class="nav-item"><div class="nav-icon"></div>통계</div>
+            <div class="nav-item active"><div class="nav-icon"></div>설정</div>
+          </div>
+        </div>
+        <div class="screen-desc">
+          프로필 정보, 그룹명, 초대 코드를 확인할 수 있습니다.
+          초대 코드 옆 복사 버튼으로 클립보드에 복사하여 가족에게 공유합니다.
+        </div>
+      </div>
+
+      <div class="screen-item" style="display:flex; flex-direction:column; justify-content:center;">
+        <div style="background:var(--surface-50); border-radius:16px; padding:24px;">
+          <h4 style="font-size:15px; font-weight:700; margin-bottom:16px; color:var(--brand-700);">하단 탭 네비게이션</h4>
+          <p style="font-size:13px; line-height:1.7; color:#555;">
+            모든 화면 하단에 5개 탭이 고정됩니다:<br><br>
+            <strong>홈</strong> — 대시보드 (이번 달 요약)<br>
+            <strong>내역</strong> — 전체 지출 리스트<br>
+            <strong>+ (입력)</strong> — 지출 입력 (중앙 강조)<br>
+            <strong>통계</strong> — 차트 분석<br>
+            <strong>설정</strong> — 프로필/그룹 관리<br><br>
+            중앙의 입력 버튼은 초록색 플로팅 스타일로 시각적으로 강조되어 가장 많이 쓰는 기능에 빠르게 접근할 수 있습니다.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ 4. 샘플 데이터 ══════ -->
+    <div class="page-break"></div>
+    <h2 class="section-title">4. 샘플 데이터</h2>
+
+    <h3 class="sub-title">4-1. 그룹 및 구성원</h3>
+    <table class="data-table">
+      <thead>
+        <tr><th>그룹명</th><th>초대 코드</th><th>구성원</th><th>역할</th><th>참여일</th></tr>
+      </thead>
+      <tbody>
+        <tr><td rowspan="2" style="vertical-align:middle; font-weight:600;">우리집 밥상</td><td rowspan="2" class="center" style="vertical-align:middle; font-family:monospace; letter-spacing:2px;">X7K2MP</td><td>문상경</td><td class="center">owner</td><td class="center">2026-03-01</td></tr>
+        <tr><td>이소희</td><td class="center">member</td><td class="center">2026-03-02</td></tr>
+      </tbody>
+    </table>
+
+    <h3 class="sub-title">4-2. 카테고리</h3>
+    <table class="data-table">
+      <thead>
+        <tr><th>카테고리</th><th>아이콘</th><th>색상</th><th>용도</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><span class="category-dot" style="background:#22c55e;"></span>식재료</td><td class="center">🛒</td><td class="center" style="font-family:monospace;">#22c55e</td><td>마트, 시장 장보기</td></tr>
+        <tr><td><span class="category-dot" style="background:#f97316;"></span>배달/외식</td><td class="center">🍜</td><td class="center" style="font-family:monospace;">#f97316</td><td>배달음식, 외식</td></tr>
+        <tr><td><span class="category-dot" style="background:#a78bfa;"></span>카페/간식</td><td class="center">☕</td><td class="center" style="font-family:monospace;">#a78bfa</td><td>카페, 베이커리, 편의점</td></tr>
+        <tr><td><span class="category-dot" style="background:#facc15;"></span>술/회식</td><td class="center">🍺</td><td class="center" style="font-family:monospace;">#facc15</td><td>술자리, 회식</td></tr>
+        <tr><td><span class="category-dot" style="background:#94a3b8;"></span>기타</td><td class="center">📦</td><td class="center" style="font-family:monospace;">#94a3b8</td><td>분류 안 되는 식비</td></tr>
+      </tbody>
+    </table>
+
+    <h3 class="sub-title">4-3. 지출 내역 (2026년 3월)</h3>
+    <table class="data-table">
+      <thead>
+        <tr><th>날짜</th><th>카테고리</th><th>금액</th><th>메모</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="center">03-02</td><td><span class="category-dot" style="background:#22c55e;"></span>식재료</td><td class="num">45,200원</td><td>이마트 장보기</td></tr>
+        <tr><td class="center">03-03</td><td><span class="category-dot" style="background:#f97316;"></span>배달/외식</td><td class="num">32,000원</td><td>가족 외식 (한식당)</td></tr>
+        <tr><td class="center">03-05</td><td><span class="category-dot" style="background:#f97316;"></span>배달/외식</td><td class="num">28,500원</td><td>치킨 배달</td></tr>
+        <tr><td class="center">03-07</td><td><span class="category-dot" style="background:#a78bfa;"></span>카페/간식</td><td class="num">9,800원</td><td>스타벅스</td></tr>
+        <tr><td class="center">03-08</td><td><span class="category-dot" style="background:#22c55e;"></span>식재료</td><td class="num">67,300원</td><td>코스트코 장보기</td></tr>
+        <tr><td class="center">03-10</td><td><span class="category-dot" style="background:#a78bfa;"></span>카페/간식</td><td class="num">5,400원</td><td>편의점 간식</td></tr>
+        <tr><td class="center">03-12</td><td><span class="category-dot" style="background:#f97316;"></span>배달/외식</td><td class="num">55,000원</td><td>생일 외식 (이탈리안)</td></tr>
+        <tr><td class="center">03-14</td><td><span class="category-dot" style="background:#f97316;"></span>배달/외식</td><td class="num">19,900원</td><td>피자 배달</td></tr>
+        <tr><td class="center">03-18</td><td><span class="category-dot" style="background:#22c55e;"></span>식재료</td><td class="num">38,700원</td><td>동네 마트</td></tr>
+        <tr><td class="center">03-20</td><td><span class="category-dot" style="background:#a78bfa;"></span>카페/간식</td><td class="num">12,600원</td><td>투썸플레이스</td></tr>
+        <tr><td class="center">03-22</td><td><span class="category-dot" style="background:#f97316;"></span>배달/외식</td><td class="num">24,000원</td><td>중식 배달</td></tr>
+        <tr><td class="center">03-25</td><td><span class="category-dot" style="background:#22c55e;"></span>식재료</td><td class="num">52,100원</td><td>이마트 장보기</td></tr>
+        <tr><td class="center">03-27</td><td><span class="category-dot" style="background:#f97316;"></span>배달/외식</td><td class="num">41,000원</td><td>주말 브런치</td></tr>
+        <tr><td class="center">03-30</td><td><span class="category-dot" style="background:#a78bfa;"></span>카페/간식</td><td class="num">8,200원</td><td>베이커리</td></tr>
+        <tr class="total-row"><td colspan="2" style="text-align:center;">합계 (14건)</td><td class="num">439,700원</td><td></td></tr>
+      </tbody>
+    </table>
+
+    <h3 class="sub-title">4-4. 카테고리별 월간 요약</h3>
+    <table class="data-table">
+      <thead>
+        <tr><th>카테고리</th><th>건수</th><th>합계</th><th>비중</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><span class="category-dot" style="background:#22c55e;"></span>식재료</td><td class="center">4건</td><td class="num">203,300원</td><td class="center">46.2%</td></tr>
+        <tr><td><span class="category-dot" style="background:#f97316;"></span>배달/외식</td><td class="center">6건</td><td class="num">200,400원</td><td class="center">45.6%</td></tr>
+        <tr><td><span class="category-dot" style="background:#a78bfa;"></span>카페/간식</td><td class="center">4건</td><td class="num">36,000원</td><td class="center">8.2%</td></tr>
+        <tr class="total-row"><td>합계</td><td class="center">14건</td><td class="num">439,700원</td><td class="center">100%</td></tr>
+      </tbody>
+    </table>
+
+    <!-- ══════ 5. 구현 현황 ══════ -->
+    <div class="page-break"></div>
+    <h2 class="section-title">5. 구현 현황 및 로드맵</h2>
+
+    <h3 class="sub-title">완료된 기능</h3>
+    <ul class="feature-list">
+      <li><span class="badge badge-done">완료</span> 구글 OAuth 로그인</li>
+      <li><span class="badge badge-done">완료</span> 그룹 생성 / 초대코드 참여</li>
+      <li><span class="badge badge-done">완료</span> 지출 입력 (금액, 카테고리, 날짜, 메모, 사진)</li>
+      <li><span class="badge badge-done">완료</span> 지출 내역 (날짜 그룹, 필터, 삭제)</li>
+      <li><span class="badge badge-done">완료</span> 상세 품목 펼쳐보기 (품목별 금액 조회)</li>
+      <li><span class="badge badge-done">완료</span> 대시보드 (이번 달 합계, 카테고리 요약)</li>
+      <li><span class="badge badge-done">완료</span> 통계 (파이 차트, 월별 바 차트)</li>
+      <li><span class="badge badge-done">완료</span> 설정 (프로필, 초대코드 복사, 로그아웃)</li>
+      <li><span class="badge badge-done">완료</span> 영수증 사진 업로드</li>
+      <li><span class="badge badge-done">완료</span> 품목 과거 구매 내역 조회 (가격 추이, 통계)</li>
+    </ul>
+
+    <h3 class="sub-title">예정된 기능 (로드맵)</h3>
+    <ul class="feature-list">
+      <li><span class="badge badge-todo">예정</span> 지출 수정 기능</li>
+      <li><span class="badge badge-todo">예정</span> 카테고리 추가/편집 UI</li>
+      <li><span class="badge badge-todo">예정</span> PWA 설정 (홈 화면 추가)</li>
+      <li><span class="badge badge-todo">예정</span> 영수증 AI 인식 (OCR)</li>
+      <li><span class="badge badge-todo">예정</span> 반응형 데스크톱 레이아웃</li>
+      <li><span class="badge badge-todo">예정</span> 중복 제출 방지</li>
+    </ul>
+
+    <!-- ── 데이터 보안 ── -->
+    <h3 class="sub-title">데이터 보안</h3>
+    <div class="highlight-box">
+      모든 데이터 테이블에 <strong>행 수준 보안(Row Level Security)</strong>이 적용되어 있습니다.<br>
+      로그인한 사용자가 속한 그룹의 데이터에만 접근할 수 있으며, 다른 그룹의 데이터는 열람/수정이 불가합니다.
+    </div>
+
+    <table class="data-table">
+      <thead>
+        <tr><th>테이블</th><th>주요 필드</th><th>설명</th></tr>
+      </thead>
+      <tbody>
+        <tr><td style="font-weight:600;">households</td><td>id, name, invite_code</td><td>그룹(가구) 정보</td></tr>
+        <tr><td style="font-weight:600;">memberships</td><td>household_id, user_id, role</td><td>그룹 구성원 (owner/member)</td></tr>
+        <tr><td style="font-weight:600;">categories</td><td>household_id, name, icon, color</td><td>지출 카테고리</td></tr>
+        <tr><td style="font-weight:600;">expenses</td><td>household_id, category_id, amount, memo, date</td><td>지출 기록</td></tr>
+        <tr><td style="font-weight:600;">expense_items</td><td>expense_id, name, amount</td><td>상세 구매 품목</td></tr>
+      </tbody>
+    </table>
+
+    <div style="text-align:center; margin-top:60px; padding:20px; color:#bbb; font-size:13px;">
+      — 식비기록 서비스 설명 자료 끝 —
+    </div>
+
+  </div>
+</div>
+</body>
+</html>
