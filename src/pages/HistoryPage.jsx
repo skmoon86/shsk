@@ -9,8 +9,8 @@ function formatKRW(n) { return n.toLocaleString('ko-KR') + '원' }
 
 export default function HistoryPage() {
   const [filterCat, setFilterCat] = useState('')
-  const [filterFrom, setFilterFrom] = useState('')
-  const [filterTo, setFilterTo]   = useState('')
+  const [filterFrom, setFilterFrom] = useState(dayjs().startOf('month').format('YYYY-MM-DD'))
+  const [filterTo, setFilterTo]   = useState(dayjs().format('YYYY-MM-DD'))
   const navigate = useNavigate()
   const [expandedId, setExpandedId] = useState(null)
   const { expenses, loading, deleteExpense } = useExpenses({
