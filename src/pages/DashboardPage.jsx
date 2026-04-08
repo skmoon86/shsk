@@ -115,8 +115,10 @@ export default function DashboardPage() {
               >
                 <span className="text-xl">{e.categories?.icon || '📦'}</span>
                 <div className="flex-1 min-w-0">
-                  <p className="font-body text-sm text-surface-900 truncate">{e.memo || e.categories?.name}</p>
-                  <p className="text-xs text-surface-800/40">{dayjs(e.date).format('M.D')}</p>
+                  <p className="font-body text-sm text-surface-900 truncate">{e.categories?.name || '기타'}</p>
+                  <p className="text-xs text-surface-800/40 truncate">
+                    {dayjs(e.date).format('M.D')}{e.memo ? ` | ${e.memo}` : ''}
+                  </p>
                 </div>
                 <span className="font-display font-semibold text-sm">{formatKRW(e.amount)}</span>
               </div>

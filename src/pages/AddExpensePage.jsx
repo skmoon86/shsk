@@ -8,6 +8,17 @@ import { useExpenses } from '@/hooks/useExpenses'
 import { useCategories } from '@/hooks/useCategories'
 import toast from 'react-hot-toast'
 
+const ICON_OPTIONS = [
+  '🛒','🍜','☕','🍺','📦','🍱','🍕','🍔','🥗','🧁',
+  '🍣','🥩','🍳','🥤','🧃','🍰','🍩','🥐','🍎','🥬',
+  '🧀','🍿','🫘','🥚','🐟','🍦','🫖','🧋','🍷','🎂',
+]
+
+const COLOR_OPTIONS = [
+  '#22c55e','#f97316','#a78bfa','#facc15','#94a3b8',
+  '#ef4444','#3b82f6','#ec4899','#14b8a6','#8b5cf6',
+]
+
 function ItemInput({ value, onChange, household }) {
   const [suggestions, setSuggestions] = useState([])
   const [showSuggestions, setShowSuggestions] = useState(false)
@@ -88,6 +99,8 @@ export default function AddExpensePage() {
   const [categoryId, setCategoryId] = useState('')
   const [customCategory, setCustomCategory] = useState('')
   const [showCategoryInput, setShowCategoryInput] = useState(false)
+  const [selectedIcon, setSelectedIcon] = useState('📦')
+  const [selectedColor, setSelectedColor] = useState('#94a3b8')
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [memo, setMemo]           = useState('')
@@ -212,7 +225,7 @@ export default function AddExpensePage() {
       if (existing) {
         finalCategoryId = existing.id
       } else {
-        const newCat = await addCategory(customCategory.trim())
+        const newCat = await addCategory(customCategory.trim(), selectedIcon, selectedColor)
         if (!newCat) { setUploading(false); return }
         finalCategoryId = newCat.id
       }
@@ -351,9 +364,36 @@ export default function AddExpensePage() {
               className="w-full bg-surface-0 border border-surface-200 rounded-2xl px-4 py-3 font-body text-sm outline-none focus:ring-2 focus:ring-brand-300"
             />
             {customCategory.trim() && !exactMatch && (
-              <p className="mt-1.5 text-xs font-body text-brand-500">
-                "{customCategory.trim()}" 카테고리가 새로 만들어집니다
-              </p>
+              <div className="mt-3 space-y-3">
+                <p className="text-xs font-body text-brand-500">
+                  "{customCategory.trim()}" 카테고리가 새로 만들어집니다
+                </p>
+                <div className="space-y-1.5">
+                  <p className="text-xs font-display font-semibold text-surface-800/40">아이콘</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {ICON_OPTIONS.map(icon => (
+                      <button key={icon} onClick={() => setSelectedIcon(icon)}
+                        className={`w-9 h-9 flex items-center justify-center rounded-xl text-lg transition-all ${
+                          selectedIcon === icon ? 'bg-brand-100 ring-2 ring-brand-400 scale-110' : 'bg-surface-50 hover:bg-surface-100'
+                        }`}>
+                        {icon}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <p className="text-xs font-display font-semibold text-surface-800/40">색상</p>
+                  <div className="flex flex-wrap gap-2">
+                    {COLOR_OPTIONS.map(color => (
+                      <button key={color} onClick={() => setSelectedColor(color)}
+                        className={`w-7 h-7 rounded-full transition-all ${
+                          selectedColor === color ? 'ring-2 ring-offset-2 ring-brand-400 scale-110' : ''
+                        }`}
+                        style={{ backgroundColor: color }} />
+                    ))}
+                  </div>
+                </div>
+              </div>
             )}
             {customCategory.trim() && filteredCategories.length > 0 && !exactMatch && (
               <div className="mt-1.5 flex flex-wrap gap-1.5">

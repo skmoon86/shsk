@@ -19,11 +19,11 @@ export function useCategories() {
 
   useEffect(() => { fetch() }, [fetch])
 
-  const addCategory = async (name) => {
+  const addCategory = async (name, icon = '📦', color = '#94a3b8') => {
     if (!household) return null
     const { data, error } = await supabase
       .from('categories')
-      .insert({ household_id: household.id, name, icon: '📦', color: '#94a3b8' })
+      .insert({ household_id: household.id, name, icon, color })
       .select()
       .single()
     if (error) { toast.error('카테고리 추가에 실패했어요.'); return null }

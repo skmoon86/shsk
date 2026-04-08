@@ -100,7 +100,7 @@ export default function HistoryPage() {
                       <span className="text-xl">{e.categories?.icon || '📦'}</span>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5">
-                          <p className="font-body text-sm text-surface-900 truncate">{e.memo || e.categories?.name}</p>
+                          <p className="font-body text-sm text-surface-900 truncate">{e.categories?.name || '기타'}</p>
                           {hasItems && (
                             <span className="shrink-0 text-[10px] font-body text-brand-500 bg-brand-50 rounded-full px-1.5 py-0.5">
                               {e.expense_items.length}개 품목
@@ -108,15 +108,17 @@ export default function HistoryPage() {
                           )}
                         </div>
                         <div className="flex items-center gap-1.5">
+                          <span className="text-xs text-surface-800/40 truncate">
+                            {dayjs(e.date).format('M.D')}{e.memo ? ` | ${e.memo}` : ''}
+                          </span>
                           {e.payment_method && (
                             <span className="text-[10px] font-body text-surface-800/40">
                               {e.payment_method === 'card' ? '💳' : e.payment_method === 'cash' ? '💵' : '🏷️'}
-                              {e.payment_method === 'card' ? '카드' : e.payment_method === 'cash' ? '현금' : '지역화폐'}
                             </span>
                           )}
                           {e.photo_url && (
                             <a href={e.photo_url} target="_blank" rel="noreferrer"
-                              className="text-xs text-brand-500" onClick={ev => ev.stopPropagation()}>영수증 보기</a>
+                              className="text-xs text-brand-500" onClick={ev => ev.stopPropagation()}>📎</a>
                           )}
                         </div>
                       </div>
