@@ -51,14 +51,14 @@ export default function OnboardingPage() {
     if (!code.trim()) { toast.error('초대 코드를 입력해주세요'); return }
     setLoading(true)
     try {
-      const { data: household, error } = await supabase
-        .from('households')
-        .select()
-        .eq('invite_code', code.trim().toUpperCase())
-        .single()
-      if (error || !household) { toast.error('유효하지 않은 코드예요'); setLoading(false); return }
-
-      await supabase.from('memberships').insert({ household_id: household.id, user_id: user.id, role: 'member' })
+      const { data, error } = await supabase.rpc('join_household_by_invite', { code: code.trim() })
+      if (error) {
+        if (error.message.includes('INVALID_INVITE_CODE')) toast.error('유효하지 않은 코드예요')
+        else if (error.message.includes('ALREADY_MEMBER')) toast.error('이미 참여한 그룹이에요')
+        else toast.error('참여에 실패했어요')
+        setLoading(false)
+        return
+      }
       await fetchHousehold(user.id)
       navigate('/', { replace: true })
     } catch {

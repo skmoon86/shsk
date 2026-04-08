@@ -174,6 +174,40 @@ begin
 end;
 $$;
 
+-- 초대코드로 그룹 참여 함수
+create or replace function join_household_by_invite(
+  code text
+)
+returns uuid
+language plpgsql
+security definer
+as $$
+declare
+  found_id uuid;
+begin
+  select id into found_id
+  from public.households
+  where invite_code = upper(trim(code));
+
+  if found_id is null then
+    raise exception 'INVALID_INVITE_CODE';
+  end if;
+
+  -- 이미 멤버인 경우 체크
+  if exists (
+    select 1 from public.memberships
+    where household_id = found_id and user_id = auth.uid()
+  ) then
+    raise exception 'ALREADY_MEMBER';
+  end if;
+
+  insert into public.memberships (household_id, user_id, role)
+  values (found_id, auth.uid(), 'member');
+
+  return found_id;
+end;
+$$;
+
 -- =============================================
 -- Storage bucket (영수증 사진)
 -- =============================================
