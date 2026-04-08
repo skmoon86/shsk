@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { PlusCircle, ChevronLeft, ChevronRight } from 'lucide-react'
+import { PlusCircle, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react'
 import dayjs from 'dayjs'
 import { useExpenses } from '@/hooks/useExpenses'
 import { useAuthStore } from '@/stores/authStore'
@@ -38,6 +38,7 @@ export default function DashboardPage() {
   }, [expenses])
 
   const recent = expenses.slice(0, 5)
+  const [expandedId, setExpandedId] = useState(null)
 
   return (
     <div className="px-5 pt-8 pb-4 space-y-6">
@@ -108,21 +109,78 @@ export default function DashboardPage() {
           </div>
         ) : (
           <div className="space-y-2">
-            {recent.map(e => (
-              <div key={e.id}
-                onClick={() => navigate(`/edit/${e.id}`)}
-                className="flex items-center gap-3 bg-surface-0 rounded-2xl px-4 py-3 shadow-card cursor-pointer active:bg-surface-50 transition-colors"
-              >
-                <span className="text-xl">{e.categories?.icon || '📦'}</span>
-                <div className="flex-1 min-w-0">
-                  <p className="font-body text-sm text-surface-900 truncate">{e.categories?.name || '기타'}</p>
-                  <p className="text-xs text-surface-800/40 truncate">
-                    {dayjs(e.date).format('M.D')}{e.memo ? ` | ${e.memo}` : ''}
-                  </p>
+            {recent.map(e => {
+              const hasItems = e.expense_items && e.expense_items.length > 0
+              const isExpanded = expandedId === e.id
+              return (
+                <div key={e.id} className="bg-surface-0 rounded-2xl shadow-card overflow-hidden">
+                  <div
+                    className="flex items-center gap-3 px-4 py-3 cursor-pointer active:bg-surface-50 transition-colors"
+                    onClick={() => navigate(`/edit/${e.id}`)}
+                  >
+                    <span className="text-xl">{e.categories?.icon || '📦'}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <p className="font-body text-sm text-surface-900 truncate">{e.categories?.name || '기타'}</p>
+                        {hasItems && (
+                          <span className="shrink-0 text-[10px] font-body text-brand-500 bg-brand-50 rounded-full px-1.5 py-0.5">
+                            {e.expense_items.length}개 품목
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs text-surface-800/40 truncate">
+                          {dayjs(e.date).format('M.D')}{e.memo ? ` | ${e.memo}` : ''}
+                        </span>
+                        {e.payment_method && (
+                          <span className="text-[10px] font-body text-surface-800/40">
+                            {e.payment_method === 'card' ? '💳' : e.payment_method === 'cash' ? '💵' : '🏷️'}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    {hasItems && (
+                      <button
+                        onClick={(ev) => { ev.stopPropagation(); setExpandedId(isExpanded ? null : e.id) }}
+                        className="p-1 shrink-0"
+                      >
+                        {isExpanded
+                          ? <ChevronUp size={14} className="text-brand-500" />
+                          : <ChevronDown size={14} className="text-surface-800/30" />
+                        }
+                      </button>
+                    )}
+                    <span className="font-display font-semibold text-sm">{formatKRW(e.amount)}</span>
+                  </div>
+                  {hasItems && isExpanded && (
+                    <div className="px-4 pb-3 pt-2 ml-9 space-y-1.5 border-t border-surface-100">
+                      {e.expense_items.map(item => (
+                        <div key={item.id}
+                          className="flex justify-between items-center py-1 cursor-pointer rounded-lg px-1 -mx-1 hover:bg-brand-50 active:bg-brand-100 transition-colors"
+                          onClick={(ev) => {
+                            ev.stopPropagation()
+                            navigate(`/item-history?name=${encodeURIComponent(item.name)}`)
+                          }}>
+                          <span className="text-xs font-body text-brand-600 underline underline-offset-2">
+                            {item.name}
+                            {item.quantity > 1 && <span className="text-surface-800/40 no-underline ml-1">x{item.quantity}</span>}
+                          </span>
+                          <span className="text-xs font-display font-semibold text-surface-800/70">
+                            {formatKRW(item.amount * (item.quantity || 1))}
+                          </span>
+                        </div>
+                      ))}
+                      <div className="flex justify-between items-center pt-1.5 border-t border-surface-100">
+                        <span className="text-xs font-body text-surface-800/40">합계</span>
+                        <span className="text-xs font-display font-bold text-surface-900">
+                          {formatKRW(e.expense_items.reduce((s, i) => s + i.amount, 0))}
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <span className="font-display font-semibold text-sm">{formatKRW(e.amount)}</span>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </div>
