@@ -7,7 +7,20 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Supabase 환경변수가 설정되지 않았습니다. .env 파일을 확인하세요.')
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+// 삼성 인터넷 일부 버전은 navigator.locks 구현이 깨져 있어서
+// Supabase 기본 lock(processLock/navigatorLock)을 쓰면 세션/쿼리가
+// 영원히 pending 상태로 멈춘다. lock을 no-op으로 대체해 우회한다.
+// (단일 탭 기준으로는 race condition 위험이 거의 없음)
+const noopLock = async (_name, _acquireTimeout, fn) => await fn()
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    lock: noopLock,
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+  },
+})
 
 /**
  * Supabase 쿼리/Promise를 타임아웃으로 감싼다.
