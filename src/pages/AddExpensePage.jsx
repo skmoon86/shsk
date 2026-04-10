@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Camera, X, Plus, ListPlus, Trash2, Sparkles } from 'lucide-react'
+import { Camera, X, Plus, ListPlus, Trash2, Sparkles, Image as ImageIcon } from 'lucide-react'
 import dayjs from 'dayjs'
 import { supabase, withTimeout, xhrUpload, getAccessTokenFromStorage } from '@/lib/supabase'
 import { resizeImage, blobToBase64, DEBUG_PHOTO } from '@/lib/image'
@@ -95,6 +95,8 @@ export default function AddExpensePage() {
   const { addExpense, updateExpense, deleteExpense } = useExpenses()
   const { categories, addCategory, deleteCategory } = useCategories()
   const fileRef = useRef()
+  const cameraRef = useRef()
+  const [showPhotoMenu, setShowPhotoMenu] = useState(false)
   const longPressTimer = useRef(null)
 
   const [amount, setAmount]       = useState('')
@@ -656,11 +658,29 @@ export default function AddExpensePage() {
             </button>
           </div>
         ) : (
-          <button onClick={() => fileRef.current.click()}
-            className="flex items-center gap-2 bg-surface-0 border border-dashed border-surface-200 rounded-2xl px-4 py-3 text-sm font-body text-surface-800/40 hover:border-brand-300 transition-all">
-            <Camera size={16} /> 사진 첨부
-          </button>
+          <div className="relative">
+            <button onClick={() => setShowPhotoMenu(v => !v)}
+              className="flex items-center gap-2 bg-surface-0 border border-dashed border-surface-200 rounded-2xl px-4 py-3 text-sm font-body text-surface-800/40 hover:border-brand-300 transition-all">
+              <Camera size={16} /> 사진 첨부
+            </button>
+            {showPhotoMenu && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setShowPhotoMenu(false)} />
+                <div className="absolute left-0 bottom-full mb-2 z-50 bg-surface-0 border border-surface-200 rounded-2xl shadow-lg overflow-hidden w-48">
+                  <button onClick={() => { cameraRef.current.click(); setShowPhotoMenu(false) }}
+                    className="w-full flex items-center gap-2 px-4 py-3 text-sm font-body text-surface-800 hover:bg-surface-50 transition-all">
+                    <Camera size={16} /> 카메라 촬영
+                  </button>
+                  <button onClick={() => { fileRef.current.click(); setShowPhotoMenu(false) }}
+                    className="w-full flex items-center gap-2 px-4 py-3 text-sm font-body text-surface-800 hover:bg-surface-50 transition-all border-t border-surface-100">
+                    <ImageIcon size={16} /> 앨범에서 선택
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         )}
+        <input ref={cameraRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handlePhoto} />
         <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handlePhoto} />
       </div>
 
