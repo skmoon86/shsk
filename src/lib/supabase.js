@@ -1,4 +1,8 @@
 import { createClient } from '@supabase/supabase-js'
+import toast from 'react-hot-toast'
+
+const DEBUG_NET = true
+const dnet = (msg) => { if (DEBUG_NET) { try { toast(msg, { duration: 2500 }) } catch {} } }
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
@@ -16,10 +20,14 @@ const noopLock = async (_name, _acquireTimeout, fn) => await fn()
 // 삼성 인터넷 일부 버전에서 fetch가 pending 상태로 hang 걸리는
 // 이슈가 있어, XHR 기반 fetch polyfill을 Supabase client에 주입한다.
 // SDK의 모든 요청(select/insert/update/storage 등)이 XHR로 실행된다.
+let fetchSeq = 0
 function xhrFetch(input, init = {}) {
   return new Promise((resolve, reject) => {
     const url = typeof input === 'string' ? input : input.url
     const method = (init.method || (typeof input !== 'string' && input.method) || 'GET').toUpperCase()
+    const seq = ++fetchSeq
+    const short = url.split('/').slice(-2).join('/').split('?')[0]
+    dnet(`F${seq}→ ${method} ${short}`)
 
     const xhr = new XMLHttpRequest()
     xhr.open(method, url, true)
@@ -41,6 +49,7 @@ function xhrFetch(input, init = {}) {
     }
 
     xhr.onload = () => {
+      dnet(`F${seq}✓ ${xhr.status}`)
       const respHeaders = new Headers()
       xhr.getAllResponseHeaders().trim().split(/\r?\n/).forEach(line => {
         const idx = line.indexOf(':')
@@ -55,9 +64,9 @@ function xhrFetch(input, init = {}) {
         headers: respHeaders,
       }))
     }
-    xhr.onerror   = () => reject(new TypeError('Network request failed'))
-    xhr.ontimeout = () => reject(new TypeError('Network request timed out'))
-    xhr.onabort   = () => reject(new DOMException('Aborted', 'AbortError'))
+    xhr.onerror   = () => { dnet(`F${seq}✗ error`); reject(new TypeError('Network request failed')) }
+    xhr.ontimeout = () => { dnet(`F${seq}✗ timeout`); reject(new TypeError('Network request timed out')) }
+    xhr.onabort   = () => { dnet(`F${seq}✗ abort`); reject(new DOMException('Aborted', 'AbortError')) }
 
     try { xhr.send(init.body ?? null) }
     catch (err) { reject(err) }
