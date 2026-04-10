@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Camera, X, Plus, ListPlus, Trash2, Sparkles } from 'lucide-react'
 import dayjs from 'dayjs'
-import { supabase } from '@/lib/supabase'
+import { supabase, withTimeout } from '@/lib/supabase'
 import { resizeImage, blobToBase64 } from '@/lib/image'
 import { useAuthStore } from '@/stores/authStore'
 import { useExpenses } from '@/hooks/useExpenses'
@@ -226,12 +226,34 @@ export default function AddExpensePage() {
   }
 
   const uploadPhoto = async (file) => {
-    const ext  = file.name.split('.').pop()
-    const path = `${household.id}/${Date.now()}.${ext}`
-    const { error } = await supabase.storage.from('receipts').upload(path, file)
-    if (error) { toast.error('사진 업로드 실패'); return null }
-    const { data } = supabase.storage.from('receipts').getPublicUrl(path)
-    return data.publicUrl
+    try {
+      // 1) 1024px JPEG로 리사이즈/압축 — 모바일 원본(3~8MB)을 100~300KB로 줄여 업로드 시간을 단축
+      const blob = await resizeImage(file, { maxDim: 1024, quality: 0.8 })
+
+      // 2) 항상 .jpg 로 저장 (파일명에 확장자가 없는 카메라 캡처 케이스 대응)
+      const path = `${household.id}/${Date.now()}.jpg`
+
+      // 3) 30초 타임아웃을 걸어 네트워크가 끊겨도 무한 대기하지 않도록
+      const { error } = await withTimeout(
+        supabase.storage.from('receipts').upload(path, blob, {
+          contentType: 'image/jpeg',
+          upsert: false,
+        }),
+        30000,
+        '사진 업로드'
+      )
+      if (error) {
+        console.error('[uploadPhoto]', error)
+        toast.error('사진 업로드 실패')
+        return null
+      }
+      const { data } = supabase.storage.from('receipts').getPublicUrl(path)
+      return data.publicUrl
+    } catch (err) {
+      console.error('[uploadPhoto]', err)
+      toast.error(err?.message || '사진 업로드 실패')
+      return null
+    }
   }
 
   const validItems = items.filter(i => i.name.trim() && parseInt(String(i.amount).replace(/,/g, ''), 10) > 0)
