@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Camera, X, Plus, ListPlus, Trash2, Sparkles, Image as ImageIcon } from 'lucide-react'
+import ImageViewer from '@/components/ImageViewer'
 import dayjs from 'dayjs'
 import { supabase, withTimeout, xhrUpload, getAccessTokenFromStorage } from '@/lib/supabase'
 import { resizeImage, blobToBase64, DEBUG_PHOTO } from '@/lib/image'
@@ -634,7 +635,9 @@ export default function AddExpensePage() {
         {photo ? (
           <div className="flex items-start gap-3">
             <div className="relative inline-block">
-              <img src={photo.preview} alt="영수증" className="w-24 h-24 object-cover rounded-2xl border border-surface-200" />
+              <ImageViewer src={photo.preview} alt="영수증">
+                <img src={photo.preview} alt="영수증" className="w-24 h-24 object-cover rounded-2xl border border-surface-200" />
+              </ImageViewer>
               <button onClick={() => setPhoto(null)}
                 className="absolute -top-2 -right-2 bg-surface-900 text-white rounded-full p-0.5">
                 <X size={12} />
@@ -651,7 +654,9 @@ export default function AddExpensePage() {
           </div>
         ) : existingPhotoUrl ? (
           <div className="relative inline-block">
-            <img src={existingPhotoUrl} alt="영수증" className="w-24 h-24 object-cover rounded-2xl border border-surface-200" />
+            <ImageViewer src={existingPhotoUrl} alt="영수증">
+              <img src={existingPhotoUrl} alt="영수증" className="w-24 h-24 object-cover rounded-2xl border border-surface-200" />
+            </ImageViewer>
             <button onClick={() => setExistingPhotoUrl(null)}
               className="absolute -top-2 -right-2 bg-surface-900 text-white rounded-full p-0.5">
               <X size={12} />

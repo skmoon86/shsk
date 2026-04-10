@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Trash2, ChevronDown, ChevronUp } from 'lucide-react'
+import ImageViewer from '@/components/ImageViewer'
 import dayjs from 'dayjs'
 import { useExpenses } from '@/hooks/useExpenses'
 import { useCategories } from '@/hooks/useCategories'
@@ -117,8 +118,11 @@ export default function HistoryPage() {
                             </span>
                           )}
                           {e.photo_url && (
-                            <a href={e.photo_url} target="_blank" rel="noreferrer"
-                              className="text-xs text-brand-500" onClick={ev => ev.stopPropagation()}>📎</a>
+                            <span onClick={ev => ev.stopPropagation()}>
+                              <ImageViewer src={e.photo_url} alt="영수증">
+                                <span className="text-xs text-brand-500 cursor-pointer">📎</span>
+                              </ImageViewer>
+                            </span>
                           )}
                         </div>
                       </div>
