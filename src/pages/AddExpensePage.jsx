@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Camera, X, Plus, ListPlus, Trash2 } from 'lucide-react'
+import { Camera, X, Plus, ListPlus, Trash2, Sparkles } from 'lucide-react'
 import dayjs from 'dayjs'
 import { supabase } from '@/lib/supabase'
+import { resizeImage, blobToBase64 } from '@/lib/image'
 import { useAuthStore } from '@/stores/authStore'
 import { useExpenses } from '@/hooks/useExpenses'
 import { useCategories } from '@/hooks/useCategories'
@@ -113,6 +114,7 @@ export default function AddExpensePage() {
   const [showItems, setShowItems] = useState(false)
   const [items, setItems]         = useState([{ name: '', quantity: '1', amount: '' }])
   const [loadingEdit, setLoadingEdit] = useState(isEdit)
+  const [analyzing, setAnalyzing]     = useState(false)
 
   // Load existing expense for edit mode
   useEffect(() => {
@@ -180,6 +182,47 @@ export default function AddExpensePage() {
     if (!file) return
     setPhoto({ file, preview: URL.createObjectURL(file) })
     setExistingPhotoUrl(null)
+  }
+
+  const analyzeReceipt = async () => {
+    if (!photo?.file) { toast.error('먼저 영수증 사진을 첨부해주세요'); return }
+    setAnalyzing(true)
+    const loadingToast = toast.loading('영수증 분석 중...')
+    try {
+      // 1) 1024px JPEG로 압축 → base64
+      const blob   = await resizeImage(photo.file, { maxDim: 1024, quality: 0.8 })
+      const base64 = await blobToBase64(blob)
+
+      // 2) Edge Function 호출
+      const { data, error } = await supabase.functions.invoke('parse-receipt', {
+        body: { image_base64: base64, mime: 'image/jpeg' },
+      })
+      if (error) throw error
+      if (!data?.ok) throw new Error(data?.error || '분석에 실패했어요')
+
+      const result = data.result || {}
+      if (result.error) throw new Error(result.error)
+
+      // 3) 폼에 자동 채움
+      if (Array.isArray(result.items) && result.items.length > 0) {
+        setShowItems(true)
+        setItems(result.items.map(i => ({
+          name: String(i.name || ''),
+          quantity: String(i.quantity || 1),
+          amount: (parseInt(i.amount, 10) || 0).toLocaleString('ko-KR'),
+        })))
+      } else if (result.total) {
+        setAmount(parseInt(result.total, 10).toLocaleString('ko-KR'))
+      }
+      if (result.memo) setMemo(prev => prev || result.memo)
+
+      toast.success('분석 완료! 내용을 확인해주세요.', { id: loadingToast })
+    } catch (err) {
+      console.error('[analyzeReceipt]', err)
+      toast.error(err?.message || '분석에 실패했어요', { id: loadingToast })
+    } finally {
+      setAnalyzing(false)
+    }
   }
 
   const uploadPhoto = async (file) => {
@@ -549,11 +592,21 @@ export default function AddExpensePage() {
       <div className="space-y-2">
         <label className="text-xs font-display font-semibold text-surface-800/50 uppercase tracking-wide">영수증 사진</label>
         {photo ? (
-          <div className="relative inline-block">
-            <img src={photo.preview} alt="영수증" className="w-24 h-24 object-cover rounded-2xl border border-surface-200" />
-            <button onClick={() => setPhoto(null)}
-              className="absolute -top-2 -right-2 bg-surface-900 text-white rounded-full p-0.5">
-              <X size={12} />
+          <div className="flex items-start gap-3">
+            <div className="relative inline-block">
+              <img src={photo.preview} alt="영수증" className="w-24 h-24 object-cover rounded-2xl border border-surface-200" />
+              <button onClick={() => setPhoto(null)}
+                className="absolute -top-2 -right-2 bg-surface-900 text-white rounded-full p-0.5">
+                <X size={12} />
+              </button>
+            </div>
+            <button
+              onClick={analyzeReceipt}
+              disabled={analyzing}
+              className="flex items-center gap-1.5 bg-brand-50 border border-brand-200 text-brand-600 rounded-2xl px-3 py-2 text-xs font-body font-semibold hover:bg-brand-100 transition-all disabled:opacity-50"
+            >
+              <Sparkles size={14} />
+              {analyzing ? '분석 중...' : 'AI로 분석'}
             </button>
           </div>
         ) : existingPhotoUrl ? (
