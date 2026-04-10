@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import toast from 'react-hot-toast'
 
-const DEBUG_NET = true
+const DEBUG_NET = false
 const dnet = (msg) => { if (DEBUG_NET) { try { toast(msg, { duration: 2500 }) } catch {} } }
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL

@@ -1,7 +1,7 @@
 import toast from 'react-hot-toast'
 
 // 디버깅용: 삼성 인터넷 문제 추적 끝나면 false 로 내릴 것
-export const DEBUG_PHOTO = true
+export const DEBUG_PHOTO = false
 const dbg = (msg) => { if (DEBUG_PHOTO) toast(msg, { duration: 2500 }) }
 
 // 이미지 리사이즈/압축 + base64 변환 유틸
