@@ -502,30 +502,6 @@ export default function AddExpensePage() {
         )}
       </div>
 
-      {/* Payment Method */}
-      <div className="space-y-2">
-        <label className="text-xs font-display font-semibold text-surface-800/50 uppercase tracking-wide">결제 방법</label>
-        <div className="flex gap-2">
-          {[
-            { value: 'card', label: '💳 카드' },
-            { value: 'cash', label: '💵 현금' },
-            { value: 'local_currency', label: '🏷️ 지역화폐' },
-          ].map(m => (
-            <button
-              key={m.value}
-              onClick={() => setPaymentMethod(m.value)}
-              className={`flex-1 py-2.5 rounded-2xl text-sm font-body transition-all border ${
-                paymentMethod === m.value
-                  ? 'bg-brand-500 text-white border-transparent shadow-card'
-                  : 'bg-surface-0 text-surface-800 border-surface-200'
-              }`}
-            >
-              {m.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
       {/* Date */}
       <div className="space-y-1.5">
         <label className="text-xs font-display font-semibold text-surface-800/50 uppercase tracking-wide">날짜</label>
@@ -624,6 +600,30 @@ export default function AddExpensePage() {
         />
       </div>
 
+      {/* Payment Method */}
+      <div className="space-y-2">
+        <label className="text-xs font-display font-semibold text-surface-800/50 uppercase tracking-wide">결제 방법</label>
+        <div className="flex gap-2">
+          {[
+            { value: 'card', label: '💳 카드' },
+            { value: 'cash', label: '💵 현금' },
+            { value: 'local_currency', label: '🏷️ 지역화폐' },
+          ].map(m => (
+            <button
+              key={m.value}
+              onClick={() => setPaymentMethod(m.value)}
+              className={`flex-1 py-2.5 rounded-2xl text-sm font-body transition-all border ${
+                paymentMethod === m.value
+                  ? 'bg-brand-500 text-white border-transparent shadow-card'
+                  : 'bg-surface-0 text-surface-800 border-surface-200'
+              }`}
+            >
+              {m.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Photo */}
       <div className="space-y-2">
         <label className="text-xs font-display font-semibold text-surface-800/50 uppercase tracking-wide">영수증 사진</label>
@@ -687,7 +687,7 @@ export default function AddExpensePage() {
       {/* Amount */}
       <div className="space-y-1.5">
         <label className="text-xs font-display font-semibold text-surface-800/50 uppercase tracking-wide">금액</label>
-        <div className={`flex items-center gap-2 bg-surface-0 border border-surface-200 rounded-2xl px-4 py-3.5 focus-within:ring-2 focus-within:ring-brand-300 ${showItems && validItems.length > 0 ? 'opacity-50' : ''}`}>
+        <div className={`flex items-center gap-2 bg-surface-0 border border-surface-200 rounded-2xl px-3 py-2.5 focus-within:ring-2 focus-within:ring-brand-300 ${showItems && validItems.length > 0 ? 'opacity-50' : ''}`}>
           <input
             type="text"
             inputMode="numeric"
@@ -695,9 +695,9 @@ export default function AddExpensePage() {
             onChange={e => setAmount(formatAmount(e.target.value))}
             placeholder="0"
             disabled={showItems && validItems.length > 0}
-            className="flex-1 font-display font-bold text-2xl outline-none bg-transparent text-right disabled:text-surface-800"
+            className="flex-1 font-display font-bold text-lg outline-none bg-transparent text-right disabled:text-surface-800"
           />
-          <span className="font-body text-surface-800/50">원</span>
+          <span className="font-body text-sm text-surface-800/50">원</span>
         </div>
       </div>
 
