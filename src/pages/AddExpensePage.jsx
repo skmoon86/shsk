@@ -219,49 +219,59 @@ export default function AddExpensePage() {
     if (!amt || amt <= 0) { toast.error('금액을 입력해주세요'); return }
 
     setUploading(true)
-
-    let finalCategoryId = categoryId
-    if (!finalCategoryId && customCategory.trim()) {
-      const existing = categories.find(c => c.name === customCategory.trim())
-      if (existing) {
-        finalCategoryId = existing.id
-      } else {
-        const newCat = await addCategory(customCategory.trim(), selectedIcon, selectedColor)
-        if (!newCat) { setUploading(false); return }
-        finalCategoryId = newCat.id
+    try {
+      let finalCategoryId = categoryId
+      if (!finalCategoryId && customCategory.trim()) {
+        const existing = categories.find(c => c.name === customCategory.trim())
+        if (existing) {
+          finalCategoryId = existing.id
+        } else {
+          const newCat = await addCategory(customCategory.trim(), selectedIcon, selectedColor)
+          if (!newCat) return
+          finalCategoryId = newCat.id
+        }
       }
-    }
 
-    if (!finalCategoryId) { toast.error('카테고리를 선택해주세요'); setUploading(false); return }
+      if (!finalCategoryId) { toast.error('카테고리를 선택해주세요'); return }
 
-    let photo_url = existingPhotoUrl || null
-    if (photo?.file) photo_url = await uploadPhoto(photo.file)
+      let photo_url = existingPhotoUrl || null
+      if (photo?.file) photo_url = await uploadPhoto(photo.file)
 
-    const expenseItems = showItems ? validItems.map(i => ({
-      name: i.name.trim(),
-      quantity: parseInt(i.quantity, 10) || 1,
-      amount: parseInt(String(i.amount).replace(/,/g, ''), 10),
-    })) : []
+      const expenseItems = showItems ? validItems.map(i => ({
+        name: i.name.trim(),
+        quantity: parseInt(i.quantity, 10) || 1,
+        amount: parseInt(String(i.amount).replace(/,/g, ''), 10),
+      })) : []
 
-    if (isEdit) {
-      const ok = await updateExpense(editId, {
-        amount: amt, category_id: finalCategoryId, memo, date, photo_url, payment_method: paymentMethod,
-      }, expenseItems)
+      if (isEdit) {
+        const ok = await updateExpense(editId, {
+          amount: amt, category_id: finalCategoryId, memo, date, photo_url, payment_method: paymentMethod,
+        }, expenseItems)
+        if (ok) navigate('/history', { replace: true })
+      } else {
+        const ok = await addExpense({ amount: amt, category_id: finalCategoryId, memo, date, photo_url, payment_method: paymentMethod }, expenseItems)
+        if (ok) navigate('/')
+      }
+    } catch (err) {
+      console.error('[handleSubmit]', err)
+      toast.error(err?.message || '저장 중 오류가 발생했어요.')
+    } finally {
       setUploading(false)
-      if (ok) navigate('/history', { replace: true })
-    } else {
-      const ok = await addExpense({ amount: amt, category_id: finalCategoryId, memo, date, photo_url, payment_method: paymentMethod }, expenseItems)
-      setUploading(false)
-      if (ok) navigate('/')
     }
   }
 
   const handleDelete = async () => {
     setShowDeleteConfirm(false)
     setUploading(true)
-    const ok = await deleteExpense(editId)
-    setUploading(false)
-    if (ok) navigate('/history', { replace: true })
+    try {
+      const ok = await deleteExpense(editId)
+      if (ok) navigate('/history', { replace: true })
+    } catch (err) {
+      console.error('[handleDelete]', err)
+      toast.error(err?.message || '삭제 중 오류가 발생했어요.')
+    } finally {
+      setUploading(false)
+    }
   }
 
   const formatAmount = (val) => {

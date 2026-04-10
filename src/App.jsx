@@ -13,6 +13,7 @@ import StatsPage       from '@/pages/StatsPage'
 import SettingsPage    from '@/pages/SettingsPage'
 import ItemHistoryPage from '@/pages/ItemHistoryPage'
 import AppLayout       from '@/components/layout/AppLayout'
+import ErrorBoundary   from '@/components/ErrorBoundary'
 
 function PrivateRoute({ children }) {
   const { user, loading } = useAuthStore()
@@ -33,6 +34,7 @@ export default function App() {
   useEffect(() => { init() }, [init])
 
   return (
+    <ErrorBoundary>
     <BrowserRouter>
       <Toaster position="top-center" toastOptions={{ duration: 2500 }} />
       <Routes>
@@ -54,5 +56,6 @@ export default function App() {
         </Route>
       </Routes>
     </BrowserRouter>
+    </ErrorBoundary>
   )
 }
