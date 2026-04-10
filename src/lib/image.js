@@ -1,3 +1,9 @@
+import toast from 'react-hot-toast'
+
+// 디버깅용: 삼성 인터넷 문제 추적 끝나면 false 로 내릴 것
+export const DEBUG_PHOTO = true
+const dbg = (msg) => { if (DEBUG_PHOTO) toast(msg, { duration: 2500 }) }
+
 // 이미지 리사이즈/압축 + base64 변환 유틸
 // Claude API 입력 토큰을 줄이고 업로드 시간을 단축하기 위해 사용한다.
 //
@@ -15,6 +21,7 @@ const STEP_TIMEOUT = 15000
 
 export async function resizeImage(file, { maxDim = DEFAULT_MAX_DIM, quality = DEFAULT_QUALITY } = {}) {
   console.log('[resizeImage] start', { name: file?.name, type: file?.type, size: file?.size })
+  dbg(`1/5 시작 ${(file?.size / 1024).toFixed(0)}KB ${file?.type || '?'}`)
 
   const { bitmap, width: srcW, height: srcH, cleanup } = await withStepTimeout(
     loadBitmap(file),
@@ -22,6 +29,7 @@ export async function resizeImage(file, { maxDim = DEFAULT_MAX_DIM, quality = DE
     'loadBitmap'
   )
   console.log('[resizeImage] image loaded', { w: srcW, h: srcH })
+  dbg(`3/5 디코드 OK ${srcW}x${srcH}`)
 
   try {
     if (!srcW || !srcH) throw new Error('이미지 크기를 읽을 수 없어요 (HEIC 등 미지원 포맷일 수 있음)')
@@ -44,8 +52,10 @@ export async function resizeImage(file, { maxDim = DEFAULT_MAX_DIM, quality = DE
     const ctx = canvas.getContext('2d')
     ctx.drawImage(bitmap, 0, 0, width, height)
 
+    dbg(`4/5 canvas 그림 OK ${width}x${height}`)
     const blob = await withStepTimeout(canvasToBlob(canvas, quality), STEP_TIMEOUT, 'canvas.toBlob')
     console.log('[resizeImage] done', { size: blob.size })
+    dbg(`5/5 인코딩 OK ${(blob.size / 1024).toFixed(0)}KB`)
     return blob
   } finally {
     cleanup?.()
@@ -101,6 +111,7 @@ async function loadBitmap(file) {
   // 1) createImageBitmap: 가장 안정적 (비동기 디코드, orientation 처리)
   if (typeof createImageBitmap === 'function') {
     try {
+      dbg('2/5 createImageBitmap 시도')
       const bmp = await createImageBitmap(file, { imageOrientation: 'from-image' })
       return {
         bitmap: bmp,
@@ -110,10 +121,14 @@ async function loadBitmap(file) {
       }
     } catch (err) {
       console.warn('[loadBitmap] createImageBitmap failed, fallback to <img>', err)
+      dbg(`createImageBitmap 실패: ${err?.message || err}`)
     }
+  } else {
+    dbg('createImageBitmap 미지원')
   }
 
   // 2) Fallback: <img> + ObjectURL (dataURL보다 훨씬 메모리 효율적)
+  dbg('2/5 <img> + ObjectURL 시도')
   const url = URL.createObjectURL(file)
   try {
     const img = await loadImageFromUrl(url)

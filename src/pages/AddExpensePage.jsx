@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { Camera, X, Plus, ListPlus, Trash2, Sparkles } from 'lucide-react'
 import dayjs from 'dayjs'
 import { supabase, withTimeout } from '@/lib/supabase'
-import { resizeImage, blobToBase64 } from '@/lib/image'
+import { resizeImage, blobToBase64, DEBUG_PHOTO } from '@/lib/image'
 import { useAuthStore } from '@/stores/authStore'
 import { useExpenses } from '@/hooks/useExpenses'
 import { useCategories } from '@/hooks/useCategories'
@@ -226,8 +226,10 @@ export default function AddExpensePage() {
   }
 
   const uploadPhoto = async (file) => {
+    const dbg = (msg) => { if (DEBUG_PHOTO) toast(msg, { duration: 2500 }) }
     try {
       console.log('[uploadPhoto] start', { name: file?.name, type: file?.type, size: file?.size })
+      dbg(`A. uploadPhoto 진입`)
 
       // 1) 리사이즈 시도 (1024px JPEG). 실패하면 원본 그대로 업로드.
       let body = file
@@ -240,6 +242,7 @@ export default function AddExpensePage() {
         console.log('[uploadPhoto] resized', { size: body.size })
       } catch (resizeErr) {
         console.warn('[uploadPhoto] resize failed, falling back to original', resizeErr)
+        dbg(`B. 리사이즈 실패: ${resizeErr?.message || resizeErr}`)
         toast('이미지 변환을 건너뛰고 원본을 업로드해요')
         // 원본 확장자 유지 시도
         const guessed = (file.name || '').split('.').pop()
@@ -247,6 +250,7 @@ export default function AddExpensePage() {
       }
 
       const path = `${household.id}/${Date.now()}.${ext}`
+      dbg(`C. Storage 업로드 시작 ${(body.size / 1024).toFixed(0)}KB`)
 
       // 2) 60초 타임아웃 (원본 폴백 시 모바일에서 시간이 더 걸릴 수 있음)
       const { error } = await withTimeout(
@@ -259,14 +263,17 @@ export default function AddExpensePage() {
       )
       if (error) {
         console.error('[uploadPhoto] storage error', error)
+        dbg(`D. Storage 에러: ${error.message || JSON.stringify(error)}`)
         toast.error(`사진 업로드 실패: ${error.message || ''}`)
         return null
       }
       const { data } = supabase.storage.from('receipts').getPublicUrl(path)
       console.log('[uploadPhoto] done', data.publicUrl)
+      dbg(`D. 업로드 완료`)
       return data.publicUrl
     } catch (err) {
       console.error('[uploadPhoto]', err)
+      dbg(`X. 예외: ${err?.message || err}`)
       toast.error(err?.message || '사진 업로드 실패')
       return null
     }
