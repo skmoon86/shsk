@@ -85,6 +85,34 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   },
 })
 
+// Supabase SDK가 쿼리 실행 전에 this.auth.getSession()을 호출해
+// Authorization 토큰을 가져오는데, 이게 삼성 인터넷에서 여전히
+// hang 걸리는 케이스가 있어 localStorage에서 즉시 읽도록 교체.
+const _origGetSession = supabase.auth.getSession.bind(supabase.auth)
+supabase.auth.getSession = async () => {
+  try {
+    const token = getAccessTokenFromStorage()
+    if (token) {
+      let user = null
+      try {
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i)
+          if (!key || !key.startsWith('sb-') || !key.endsWith('-auth-token')) continue
+          const parsed = JSON.parse(localStorage.getItem(key))
+          user = parsed?.user || parsed?.currentSession?.user || null
+          if (user) break
+        }
+      } catch {}
+      return { data: { session: { access_token: token, token_type: 'bearer', user } }, error: null }
+    }
+  } catch (err) {
+    console.warn('[patched getSession]', err)
+  }
+  // fallback: 원본 호출 (토큰이 없거나 에러 시)
+  try { return await _origGetSession() }
+  catch (err) { return { data: { session: null }, error: err } }
+}
+
 /**
  * Supabase 쿼리/Promise를 타임아웃으로 감싼다.
  * 네트워크가 끊기거나 Supabase가 응답하지 않을 때 영원히 pending되는 것을 방지한다.
