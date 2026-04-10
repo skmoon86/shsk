@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { supabase, withTimeout } from '@/lib/supabase'
+import { supabase, withTimeout, xhrRest } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/authStore'
 import toast from 'react-hot-toast'
 
@@ -41,30 +41,22 @@ export function useExpenses(filters = {}) {
 
   const addExpense = async (payload, items = []) => {
     try {
-      const { data, error } = await withTimeout(
-        supabase
-          .from('expenses')
-          .insert({ ...payload, household_id: household.id })
-          .select()
-          .single(),
-        15000,
-        '지출 저장'
-      )
-      if (error) { console.error('[addExpense]', error); toast.error('저장에 실패했어요.'); return false }
+      // Supabase JS SDK의 fetch POST가 삼성 인터넷 일부 버전에서
+      // hang 걸리는 이슈 때문에 XHR로 PostgREST REST API를 직접 호출.
+      const inserted = await xhrRest('POST', '/rest/v1/expenses', {
+        body: { ...payload, household_id: household.id },
+        prefer: 'return=representation',
+      })
+      const data = Array.isArray(inserted) ? inserted[0] : inserted
+      if (!data?.id) throw new Error('저장 응답이 비어 있어요')
 
       if (items.length > 0) {
-        const { error: itemErr } = await withTimeout(
-          supabase
-            .from('expense_items')
-            .insert(items.map(i => ({ expense_id: data.id, name: i.name, quantity: i.quantity || 1, amount: i.amount }))),
-          15000,
-          '품목 저장'
-        )
-        if (itemErr) { console.error('[addExpense items]', itemErr); toast.error('품목 저장에 실패했어요.'); return false }
+        await xhrRest('POST', '/rest/v1/expense_items', {
+          body: items.map(i => ({ expense_id: data.id, name: i.name, quantity: i.quantity || 1, amount: i.amount })),
+        })
       }
 
       toast.success('기록했어요!')
-      // 목록 갱신은 백그라운드로. 실패해도 저장 자체는 성공이므로 await하지 않는다.
       fetch().catch(err => console.error('[addExpense refetch]', err))
       return true
     } catch (err) {
@@ -76,29 +68,19 @@ export function useExpenses(filters = {}) {
 
   const updateExpense = async (id, payload, items = null) => {
     try {
-      const { error } = await withTimeout(
-        supabase.from('expenses').update(payload).eq('id', id),
-        15000,
-        '지출 수정'
-      )
-      if (error) { console.error('[updateExpense]', error); toast.error('수정에 실패했어요.'); return false }
+      await xhrRest('PATCH', '/rest/v1/expenses', {
+        body: payload,
+        query: { id: `eq.${id}` },
+      })
 
-      // If items provided, replace all existing items
       if (items !== null) {
-        await withTimeout(
-          supabase.from('expense_items').delete().eq('expense_id', id),
-          15000,
-          '품목 정리'
-        )
+        await xhrRest('DELETE', '/rest/v1/expense_items', {
+          query: { expense_id: `eq.${id}` },
+        })
         if (items.length > 0) {
-          const { error: itemErr } = await withTimeout(
-            supabase
-              .from('expense_items')
-              .insert(items.map(i => ({ expense_id: id, name: i.name, quantity: i.quantity || 1, amount: i.amount }))),
-            15000,
-            '품목 저장'
-          )
-          if (itemErr) { console.error('[updateExpense items]', itemErr); toast.error('품목 수정에 실패했어요.'); return false }
+          await xhrRest('POST', '/rest/v1/expense_items', {
+            body: items.map(i => ({ expense_id: id, name: i.name, quantity: i.quantity || 1, amount: i.amount })),
+          })
         }
       }
 
@@ -114,12 +96,7 @@ export function useExpenses(filters = {}) {
 
   const deleteExpense = async (id) => {
     try {
-      const { error } = await withTimeout(
-        supabase.from('expenses').delete().eq('id', id),
-        15000,
-        '지출 삭제'
-      )
-      if (error) { console.error('[deleteExpense]', error); toast.error('삭제에 실패했어요.'); return false }
+      await xhrRest('DELETE', '/rest/v1/expenses', { query: { id: `eq.${id}` } })
       toast.success('삭제했어요.')
       fetch().catch(err => console.error('[deleteExpense refetch]', err))
       return true

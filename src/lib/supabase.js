@@ -61,6 +61,50 @@ export function getAccessTokenFromStorage() {
 }
 
 /**
+ * PostgREST에 XHR로 직접 요청. Supabase JS SDK의 fetch POST가
+ * 삼성 인터넷 일부 버전에서 hang 걸리는 이슈 우회용.
+ *
+ * method: 'POST' | 'PATCH' | 'DELETE' | 'GET'
+ * path: '/rest/v1/expenses' 같은 경로
+ * body: 객체 또는 null
+ * query: URL 쿼리스트링 객체 (예: { id: 'eq.123' })
+ */
+export function xhrRest(method, path, { body = null, query = null, prefer = null } = {}) {
+  return new Promise((resolve, reject) => {
+    const token = getAccessTokenFromStorage()
+    if (!token) return reject(new Error('로그인 세션을 찾을 수 없어요'))
+
+    let url = `${supabaseUrl}${path}`
+    if (query) {
+      const qs = new URLSearchParams(query).toString()
+      if (qs) url += (url.includes('?') ? '&' : '?') + qs
+    }
+
+    const xhr = new XMLHttpRequest()
+    xhr.open(method, url, true)
+    xhr.setRequestHeader('apikey', supabaseAnonKey)
+    xhr.setRequestHeader('Authorization', `Bearer ${token}`)
+    xhr.setRequestHeader('Content-Type', 'application/json')
+    if (prefer) xhr.setRequestHeader('Prefer', prefer)
+    xhr.timeout = 30000
+
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try { resolve(xhr.responseText ? JSON.parse(xhr.responseText) : null) }
+        catch { resolve(null) }
+      } else {
+        reject(new Error(`${method} ${path} 실패 (HTTP ${xhr.status}): ${xhr.responseText?.slice(0, 200) || ''}`))
+      }
+    }
+    xhr.onerror   = () => reject(new Error(`${method} ${path} 네트워크 오류`))
+    xhr.ontimeout = () => reject(new Error(`${method} ${path} 시간 초과 (30초)`))
+
+    try { xhr.send(body ? JSON.stringify(body) : null) }
+    catch (err) { reject(err) }
+  })
+}
+
+/**
  * Supabase Storage REST API에 XHR로 직접 업로드.
  * Supabase JS SDK가 내부에서 fetch(body: Blob)을 쓰는데,
  * 삼성 인터넷 일부 버전에서 이게 행이 걸리는 이슈가 있어 XHR로 우회한다.
