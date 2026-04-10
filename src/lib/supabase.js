@@ -13,12 +13,66 @@ if (!supabaseUrl || !supabaseAnonKey) {
 // (단일 탭 기준으로는 race condition 위험이 거의 없음)
 const noopLock = async (_name, _acquireTimeout, fn) => await fn()
 
+// 삼성 인터넷 일부 버전에서 fetch가 pending 상태로 hang 걸리는
+// 이슈가 있어, XHR 기반 fetch polyfill을 Supabase client에 주입한다.
+// SDK의 모든 요청(select/insert/update/storage 등)이 XHR로 실행된다.
+function xhrFetch(input, init = {}) {
+  return new Promise((resolve, reject) => {
+    const url = typeof input === 'string' ? input : input.url
+    const method = (init.method || (typeof input !== 'string' && input.method) || 'GET').toUpperCase()
+
+    const xhr = new XMLHttpRequest()
+    xhr.open(method, url, true)
+    xhr.responseType = 'arraybuffer'
+    xhr.timeout = 60000
+
+    const headers = init.headers || (typeof input !== 'string' ? input.headers : null)
+    if (headers) {
+      if (typeof headers.forEach === 'function') {
+        headers.forEach((v, k) => { try { xhr.setRequestHeader(k, v) } catch {} })
+      } else {
+        Object.entries(headers).forEach(([k, v]) => { try { xhr.setRequestHeader(k, String(v)) } catch {} })
+      }
+    }
+
+    if (init.signal) {
+      if (init.signal.aborted) { xhr.abort(); return reject(new DOMException('Aborted', 'AbortError')) }
+      init.signal.addEventListener('abort', () => xhr.abort())
+    }
+
+    xhr.onload = () => {
+      const respHeaders = new Headers()
+      xhr.getAllResponseHeaders().trim().split(/\r?\n/).forEach(line => {
+        const idx = line.indexOf(':')
+        if (idx < 0) return
+        const k = line.slice(0, idx).trim()
+        const v = line.slice(idx + 1).trim()
+        if (k) { try { respHeaders.append(k, v) } catch {} }
+      })
+      resolve(new Response(xhr.response, {
+        status: xhr.status || 200,
+        statusText: xhr.statusText || '',
+        headers: respHeaders,
+      }))
+    }
+    xhr.onerror   = () => reject(new TypeError('Network request failed'))
+    xhr.ontimeout = () => reject(new TypeError('Network request timed out'))
+    xhr.onabort   = () => reject(new DOMException('Aborted', 'AbortError'))
+
+    try { xhr.send(init.body ?? null) }
+    catch (err) { reject(err) }
+  })
+}
+
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     lock: noopLock,
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,
+  },
+  global: {
+    fetch: xhrFetch,
   },
 })
 
