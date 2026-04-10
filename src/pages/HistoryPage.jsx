@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Trash2, ChevronDown, ChevronUp } from 'lucide-react'
 import ImageViewer from '@/components/ImageViewer'
 import dayjs from 'dayjs'
@@ -9,7 +9,8 @@ import { useCategories } from '@/hooks/useCategories'
 function formatKRW(n) { return n.toLocaleString('ko-KR') + '원' }
 
 export default function HistoryPage() {
-  const [filterCat, setFilterCat] = useState('')
+  const [searchParams] = useSearchParams()
+  const [filterCat, setFilterCat] = useState(searchParams.get('category') || '')
   const [filterFrom, setFilterFrom] = useState(dayjs().startOf('month').format('YYYY-MM-DD'))
   const [filterTo, setFilterTo]   = useState(dayjs().format('YYYY-MM-DD'))
   const navigate = useNavigate()

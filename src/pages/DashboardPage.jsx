@@ -31,7 +31,8 @@ export default function DashboardPage() {
       const key = e.categories?.name || '기타'
       const icon = e.categories?.icon || '📦'
       const color = e.categories?.color || '#94a3b8'
-      if (!map[key]) map[key] = { name: key, icon, color, total: 0 }
+      const id = e.category_id || ''
+      if (!map[key]) map[key] = { id, name: key, icon, color, total: 0 }
       map[key].total += e.amount
     }
     return Object.values(map).sort((a, b) => b.total - a.total)
@@ -71,7 +72,8 @@ export default function DashboardPage() {
           <h2 className="text-sm font-display font-semibold text-surface-800/50 uppercase tracking-wide">카테고리별</h2>
           <div className="space-y-2">
             {byCategory.map(cat => (
-              <div key={cat.name} className="flex items-center gap-3 bg-surface-0 rounded-2xl px-4 py-3 shadow-card">
+              <div key={cat.name} onClick={() => navigate(`/history?category=${cat.id}`)}
+                className="flex items-center gap-3 bg-surface-0 rounded-2xl px-4 py-3 shadow-card cursor-pointer active:scale-[0.98] transition-transform">
                 <span className="text-xl">{cat.icon}</span>
                 <span className="flex-1 font-body text-sm text-surface-800">{cat.name}</span>
                 <span className="font-display font-semibold text-sm text-surface-900">{formatKRW(cat.total)}</span>
