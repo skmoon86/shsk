@@ -1,57 +1,142 @@
 // 이미지 리사이즈/압축 + base64 변환 유틸
 // Claude API 입력 토큰을 줄이고 업로드 시간을 단축하기 위해 사용한다.
+//
+// 삼성 인터넷 등 모바일 브라우저에서 대용량 사진을 처리할 때
+// readAsDataURL + <img> + canvas.toBlob 조합이 무한 대기하거나
+// 메모리 부족으로 실패하는 사례가 있어서, 아래 방어 로직을 쓴다:
+//   1) 가능하면 createImageBitmap 사용 (비동기 디코딩 + EXIF orientation 자동 처리)
+//   2) 실패 시 <img> + ObjectURL (dataURL보다 메모리 적게 씀)
+//   3) canvas.toBlob 실패 시 toDataURL → fetch 로 Blob 복구
+//   4) 모든 단계에 타임아웃
 
 const DEFAULT_MAX_DIM = 1024
 const DEFAULT_QUALITY = 0.8
+const STEP_TIMEOUT = 15000
 
-/**
- * File을 받아서 longest-side를 maxDim으로 줄이고 JPEG로 압축한 Blob을 반환.
- *
- * 단계별 타임아웃을 두어, Samsung Internet 등에서 canvas.toBlob/Image.onload가
- * 콜백을 호출하지 않는 사례에도 무한 대기하지 않도록 한다.
- */
 export async function resizeImage(file, { maxDim = DEFAULT_MAX_DIM, quality = DEFAULT_QUALITY } = {}) {
   console.log('[resizeImage] start', { name: file?.name, type: file?.type, size: file?.size })
 
-  const dataUrl = await withStepTimeout(readAsDataURL(file), 10000, 'readAsDataURL')
-  const img = await withStepTimeout(loadImage(dataUrl), 10000, 'loadImage')
-  console.log('[resizeImage] image loaded', { w: img.width, h: img.height })
+  const { bitmap, width: srcW, height: srcH, cleanup } = await withStepTimeout(
+    loadBitmap(file),
+    STEP_TIMEOUT,
+    'loadBitmap'
+  )
+  console.log('[resizeImage] image loaded', { w: srcW, h: srcH })
 
-  let { width, height } = img
-  if (!width || !height) throw new Error('이미지 크기를 읽을 수 없어요 (HEIC 등 미지원 포맷일 수 있음)')
+  try {
+    if (!srcW || !srcH) throw new Error('이미지 크기를 읽을 수 없어요 (HEIC 등 미지원 포맷일 수 있음)')
 
-  if (width > maxDim || height > maxDim) {
-    if (width >= height) {
-      height = Math.round((height * maxDim) / width)
-      width  = maxDim
-    } else {
-      width  = Math.round((width * maxDim) / height)
-      height = maxDim
+    let width = srcW
+    let height = srcH
+    if (width > maxDim || height > maxDim) {
+      if (width >= height) {
+        height = Math.round((height * maxDim) / width)
+        width  = maxDim
+      } else {
+        width  = Math.round((width * maxDim) / height)
+        height = maxDim
+      }
     }
+
+    const canvas = document.createElement('canvas')
+    canvas.width  = width
+    canvas.height = height
+    const ctx = canvas.getContext('2d')
+    ctx.drawImage(bitmap, 0, 0, width, height)
+
+    const blob = await withStepTimeout(canvasToBlob(canvas, quality), STEP_TIMEOUT, 'canvas.toBlob')
+    console.log('[resizeImage] done', { size: blob.size })
+    return blob
+  } finally {
+    cleanup?.()
   }
+}
 
-  const canvas = document.createElement('canvas')
-  canvas.width  = width
-  canvas.height = height
-  const ctx = canvas.getContext('2d')
-  ctx.drawImage(img, 0, 0, width, height)
-
-  const blob = await withStepTimeout(
-    new Promise((resolve, reject) => {
+function canvasToBlob(canvas, quality) {
+  return new Promise((resolve, reject) => {
+    let settled = false
+    try {
       canvas.toBlob(
         (b) => {
-          if (!b) reject(new Error('canvas.toBlob 실패'))
-          else resolve(b)
+          if (settled) return
+          settled = true
+          if (b) return resolve(b)
+          // fallback: toDataURL → Blob
+          try {
+            const dataUrl = canvas.toDataURL('image/jpeg', quality)
+            dataUrlToBlob(dataUrl).then(resolve, reject)
+          } catch (err) {
+            reject(err)
+          }
         },
         'image/jpeg',
         quality
       )
-    }),
-    10000,
-    'canvas.toBlob'
-  )
-  console.log('[resizeImage] done', { size: blob.size })
-  return blob
+    } catch (err) {
+      if (settled) return
+      settled = true
+      reject(err)
+    }
+  })
+}
+
+function dataUrlToBlob(dataUrl) {
+  // fetch(dataUrl)가 일부 모바일에서 느린 경우가 있어서 수동 디코딩
+  return new Promise((resolve, reject) => {
+    try {
+      const [header, base64] = dataUrl.split(',')
+      const mime = /data:(.*?);base64/.exec(header)?.[1] || 'image/jpeg'
+      const bin = atob(base64)
+      const len = bin.length
+      const bytes = new Uint8Array(len)
+      for (let i = 0; i < len; i++) bytes[i] = bin.charCodeAt(i)
+      resolve(new Blob([bytes], { type: mime }))
+    } catch (err) {
+      reject(err)
+    }
+  })
+}
+
+async function loadBitmap(file) {
+  // 1) createImageBitmap: 가장 안정적 (비동기 디코드, orientation 처리)
+  if (typeof createImageBitmap === 'function') {
+    try {
+      const bmp = await createImageBitmap(file, { imageOrientation: 'from-image' })
+      return {
+        bitmap: bmp,
+        width: bmp.width,
+        height: bmp.height,
+        cleanup: () => bmp.close?.(),
+      }
+    } catch (err) {
+      console.warn('[loadBitmap] createImageBitmap failed, fallback to <img>', err)
+    }
+  }
+
+  // 2) Fallback: <img> + ObjectURL (dataURL보다 훨씬 메모리 효율적)
+  const url = URL.createObjectURL(file)
+  try {
+    const img = await loadImageFromUrl(url)
+    return {
+      bitmap: img,
+      width: img.naturalWidth || img.width,
+      height: img.naturalHeight || img.height,
+      cleanup: () => URL.revokeObjectURL(url),
+    }
+  } catch (err) {
+    URL.revokeObjectURL(url)
+    throw err
+  }
+}
+
+function loadImageFromUrl(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    img.decoding = 'async'
+    img.onload  = () => resolve(img)
+    img.onerror = () => reject(new Error('이미지 로드 실패'))
+    img.src = src
+  })
 }
 
 function withStepTimeout(promise, ms, label) {
@@ -63,7 +148,7 @@ function withStepTimeout(promise, ms, label) {
 }
 
 /**
- * Blob/File → base64 문자열 (data: prefix 제외, 순수 base64만)
+ * Blob/File → base64 문자열 (data: prefix 제외)
  */
 export async function blobToBase64(blob) {
   const dataUrl = await readAsDataURL(blob)
@@ -77,14 +162,5 @@ function readAsDataURL(file) {
     reader.onload  = () => resolve(reader.result)
     reader.onerror = () => reject(reader.error || new Error('파일 읽기 실패'))
     reader.readAsDataURL(file)
-  })
-}
-
-function loadImage(src) {
-  return new Promise((resolve, reject) => {
-    const img = new Image()
-    img.onload  = () => resolve(img)
-    img.onerror = () => reject(new Error('이미지 로드 실패'))
-    img.src = src
   })
 }
