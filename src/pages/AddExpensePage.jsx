@@ -227,27 +227,43 @@ export default function AddExpensePage() {
 
   const uploadPhoto = async (file) => {
     try {
-      // 1) 1024px JPEG로 리사이즈/압축 — 모바일 원본(3~8MB)을 100~300KB로 줄여 업로드 시간을 단축
-      const blob = await resizeImage(file, { maxDim: 1024, quality: 0.8 })
+      console.log('[uploadPhoto] start', { name: file?.name, type: file?.type, size: file?.size })
 
-      // 2) 항상 .jpg 로 저장 (파일명에 확장자가 없는 카메라 캡처 케이스 대응)
-      const path = `${household.id}/${Date.now()}.jpg`
+      // 1) 리사이즈 시도 (1024px JPEG). 실패하면 원본 그대로 업로드.
+      let body = file
+      let contentType = file.type || 'image/jpeg'
+      let ext = 'jpg'
+      try {
+        body = await resizeImage(file, { maxDim: 1024, quality: 0.8 })
+        contentType = 'image/jpeg'
+        ext = 'jpg'
+        console.log('[uploadPhoto] resized', { size: body.size })
+      } catch (resizeErr) {
+        console.warn('[uploadPhoto] resize failed, falling back to original', resizeErr)
+        toast('이미지 변환을 건너뛰고 원본을 업로드해요')
+        // 원본 확장자 유지 시도
+        const guessed = (file.name || '').split('.').pop()
+        if (guessed && guessed.length <= 5) ext = guessed
+      }
 
-      // 3) 30초 타임아웃을 걸어 네트워크가 끊겨도 무한 대기하지 않도록
+      const path = `${household.id}/${Date.now()}.${ext}`
+
+      // 2) 60초 타임아웃 (원본 폴백 시 모바일에서 시간이 더 걸릴 수 있음)
       const { error } = await withTimeout(
-        supabase.storage.from('receipts').upload(path, blob, {
-          contentType: 'image/jpeg',
+        supabase.storage.from('receipts').upload(path, body, {
+          contentType,
           upsert: false,
         }),
-        30000,
+        60000,
         '사진 업로드'
       )
       if (error) {
-        console.error('[uploadPhoto]', error)
-        toast.error('사진 업로드 실패')
+        console.error('[uploadPhoto] storage error', error)
+        toast.error(`사진 업로드 실패: ${error.message || ''}`)
         return null
       }
       const { data } = supabase.storage.from('receipts').getPublicUrl(path)
+      console.log('[uploadPhoto] done', data.publicUrl)
       return data.publicUrl
     } catch (err) {
       console.error('[uploadPhoto]', err)

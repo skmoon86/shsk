@@ -6,12 +6,20 @@ const DEFAULT_QUALITY = 0.8
 
 /**
  * File을 받아서 longest-side를 maxDim으로 줄이고 JPEG로 압축한 Blob을 반환.
+ *
+ * 단계별 타임아웃을 두어, Samsung Internet 등에서 canvas.toBlob/Image.onload가
+ * 콜백을 호출하지 않는 사례에도 무한 대기하지 않도록 한다.
  */
 export async function resizeImage(file, { maxDim = DEFAULT_MAX_DIM, quality = DEFAULT_QUALITY } = {}) {
-  const dataUrl = await readAsDataURL(file)
-  const img = await loadImage(dataUrl)
+  console.log('[resizeImage] start', { name: file?.name, type: file?.type, size: file?.size })
+
+  const dataUrl = await withStepTimeout(readAsDataURL(file), 10000, 'readAsDataURL')
+  const img = await withStepTimeout(loadImage(dataUrl), 10000, 'loadImage')
+  console.log('[resizeImage] image loaded', { w: img.width, h: img.height })
 
   let { width, height } = img
+  if (!width || !height) throw new Error('이미지 크기를 읽을 수 없어요 (HEIC 등 미지원 포맷일 수 있음)')
+
   if (width > maxDim || height > maxDim) {
     if (width >= height) {
       height = Math.round((height * maxDim) / width)
@@ -28,16 +36,30 @@ export async function resizeImage(file, { maxDim = DEFAULT_MAX_DIM, quality = DE
   const ctx = canvas.getContext('2d')
   ctx.drawImage(img, 0, 0, width, height)
 
-  return new Promise((resolve, reject) => {
-    canvas.toBlob(
-      (blob) => {
-        if (!blob) reject(new Error('이미지 변환 실패'))
-        else resolve(blob)
-      },
-      'image/jpeg',
-      quality
-    )
+  const blob = await withStepTimeout(
+    new Promise((resolve, reject) => {
+      canvas.toBlob(
+        (b) => {
+          if (!b) reject(new Error('canvas.toBlob 실패'))
+          else resolve(b)
+        },
+        'image/jpeg',
+        quality
+      )
+    }),
+    10000,
+    'canvas.toBlob'
+  )
+  console.log('[resizeImage] done', { size: blob.size })
+  return blob
+}
+
+function withStepTimeout(promise, ms, label) {
+  let t
+  const timeout = new Promise((_, reject) => {
+    t = setTimeout(() => reject(new Error(`${label} 시간 초과 (${ms / 1000}초)`)), ms)
   })
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(t))
 }
 
 /**
