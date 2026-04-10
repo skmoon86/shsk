@@ -26,6 +26,28 @@ export function withTimeout(promise, ms = 15000, label = '요청') {
 }
 
 /**
+ * localStorage에서 Supabase access_token을 직접 꺼낸다.
+ * supabase.auth.getSession()이 내부에서 navigator.locks를 쓰는데
+ * 삼성 인터넷 일부 버전에서 이게 hang 걸리는 이슈 우회용.
+ */
+export function getAccessTokenFromStorage() {
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i)
+      if (!key || !key.startsWith('sb-') || !key.endsWith('-auth-token')) continue
+      const raw = localStorage.getItem(key)
+      if (!raw) continue
+      const parsed = JSON.parse(raw)
+      const token = parsed?.access_token || parsed?.currentSession?.access_token
+      if (token) return token
+    }
+  } catch (err) {
+    console.warn('[getAccessTokenFromStorage]', err)
+  }
+  return null
+}
+
+/**
  * Supabase Storage REST API에 XHR로 직접 업로드.
  * Supabase JS SDK가 내부에서 fetch(body: Blob)을 쓰는데,
  * 삼성 인터넷 일부 버전에서 이게 행이 걸리는 이슈가 있어 XHR로 우회한다.

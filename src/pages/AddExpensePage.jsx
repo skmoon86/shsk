@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Camera, X, Plus, ListPlus, Trash2, Sparkles } from 'lucide-react'
 import dayjs from 'dayjs'
-import { supabase, withTimeout, xhrUpload } from '@/lib/supabase'
+import { supabase, withTimeout, xhrUpload, getAccessTokenFromStorage } from '@/lib/supabase'
 import { resizeImage, blobToBase64, DEBUG_PHOTO } from '@/lib/image'
 import { useAuthStore } from '@/stores/authStore'
 import { useExpenses } from '@/hooks/useExpenses'
@@ -252,14 +252,14 @@ export default function AddExpensePage() {
       const path = `${household.id}/${Date.now()}.${ext}`
       dbg(`C. Storage 업로드 시작 ${(body.size / 1024).toFixed(0)}KB`)
 
-      // 2) Supabase JS SDK의 fetch+Blob 조합이 삼성 인터넷 일부 버전에서
-      //    행이 걸리는 이슈가 있어서 XHR로 직접 Storage REST API를 호출한다.
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) throw new Error('로그인 세션이 없어요')
+      // 2) supabase.auth.getSession()이 삼성 인터넷에서 navigator.locks
+      //    hang 때문에 멈추는 이슈가 있어 localStorage에서 직접 꺼낸다.
+      const accessToken = getAccessTokenFromStorage()
+      if (!accessToken) throw new Error('로그인 세션을 찾을 수 없어요')
       dbg('C1. 세션 OK, XHR 시작')
 
       const url = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/receipts/${path}`
-      await xhrUpload(url, body, contentType, session.access_token, dbg)
+      await xhrUpload(url, body, contentType, accessToken, dbg)
       const { data: pub } = supabase.storage.from('receipts').getPublicUrl(path)
       console.log('[uploadPhoto] done', pub.publicUrl)
       dbg(`D. 업로드 완료`)
