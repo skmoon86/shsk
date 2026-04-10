@@ -14,7 +14,7 @@ const DEFAULT_CATEGORIES = [
 
 export default function OnboardingPage() {
   const navigate = useNavigate()
-  const { user, fetchHousehold } = useAuthStore()
+  const { user, fetchHousehold, signOut } = useAuthStore()
   const [tab, setTab] = useState('create') // 'create' | 'join'
   const [name, setName] = useState('')
   const [code, setCode] = useState('')
@@ -117,6 +117,11 @@ export default function OnboardingPage() {
             </>
           )}
         </div>
+
+        <button onClick={signOut}
+          className="w-full text-sm text-surface-800/40 font-body hover:text-surface-800/60 transition-all py-2">
+          다른 계정으로 로그인
+        </button>
       </div>
     </div>
   )
