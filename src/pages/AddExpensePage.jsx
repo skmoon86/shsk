@@ -394,23 +394,6 @@ export default function AddExpensePage() {
         )}
       </div>
 
-      {/* Amount */}
-      <div className="space-y-1.5">
-        <label className="text-xs font-display font-semibold text-surface-800/50 uppercase tracking-wide">금액</label>
-        <div className={`flex items-center gap-2 bg-surface-0 border border-surface-200 rounded-2xl px-4 py-3.5 focus-within:ring-2 focus-within:ring-brand-300 ${showItems && validItems.length > 0 ? 'opacity-50' : ''}`}>
-          <input
-            type="text"
-            inputMode="numeric"
-            value={showItems && validItems.length > 0 ? itemsTotal.toLocaleString('ko-KR') : amount}
-            onChange={e => setAmount(formatAmount(e.target.value))}
-            placeholder="0"
-            disabled={showItems && validItems.length > 0}
-            className="flex-1 font-display font-bold text-2xl outline-none bg-transparent text-right disabled:text-surface-800"
-          />
-          <span className="font-body text-surface-800/50">원</span>
-        </div>
-      </div>
-
       {/* Category */}
       <div className="space-y-2">
         <label className="text-xs font-display font-semibold text-surface-800/50 uppercase tracking-wide">카테고리</label>
@@ -699,6 +682,23 @@ export default function AddExpensePage() {
         )}
         <input ref={cameraRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handlePhoto} />
         <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handlePhoto} />
+      </div>
+
+      {/* Amount */}
+      <div className="space-y-1.5">
+        <label className="text-xs font-display font-semibold text-surface-800/50 uppercase tracking-wide">금액</label>
+        <div className={`flex items-center gap-2 bg-surface-0 border border-surface-200 rounded-2xl px-4 py-3.5 focus-within:ring-2 focus-within:ring-brand-300 ${showItems && validItems.length > 0 ? 'opacity-50' : ''}`}>
+          <input
+            type="text"
+            inputMode="numeric"
+            value={showItems && validItems.length > 0 ? itemsTotal.toLocaleString('ko-KR') : amount}
+            onChange={e => setAmount(formatAmount(e.target.value))}
+            placeholder="0"
+            disabled={showItems && validItems.length > 0}
+            className="flex-1 font-display font-bold text-2xl outline-none bg-transparent text-right disabled:text-surface-800"
+          />
+          <span className="font-body text-surface-800/50">원</span>
+        </div>
       </div>
 
       <button
