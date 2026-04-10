@@ -13,7 +13,7 @@
 import { serve } from 'https://deno.land/std@0.224.0/http/server.ts'
 
 const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY')
-const MODEL = 'claude-haiku-4-5-20251001'
+const MODEL = 'claude-sonnet-4-6'
 
 const SYSTEM_PROMPT = `당신은 한국 영수증 OCR 전문가입니다.
 사용자가 보낸 영수증 사진을 보고 다음 JSON 스키마에 정확히 맞춰 응답하세요.
@@ -82,7 +82,7 @@ serve(async (req) => {
   try {
     const body = await req.json()
     // 클라이언트는 base64 데이터(`image_base64`)와 mime 타입(`mime`)을 보낸다.
-    const { image_base64, mime } = body
+    const { image_base64, mime, known_items } = body
     if (!image_base64 || typeof image_base64 !== 'string') {
       return jsonResponse({ error: 'image_base64 is required' }, 400)
     }
@@ -98,7 +98,9 @@ serve(async (req) => {
       body: JSON.stringify({
         model: MODEL,
         max_tokens: 1500,
-        system: SYSTEM_PROMPT,
+        system: Array.isArray(known_items) && known_items.length > 0
+          ? SYSTEM_PROMPT + `\n\n기존 품목명 목록:\n${known_items.join(', ')}\n\n위 목록에 유사한 품목이 있으면 영수증 원문 대신 기존 품목명을 사용하세요. 예: 영수증에 "무농약새송이버섯"이 있고 기존 목록에 "새송이버섯"이 있으면 "새송이버섯"으로 통일.`
+          : SYSTEM_PROMPT,
         tools: [TOOL_SCHEMA],
         tool_choice: { type: 'tool', name: 'submit_receipt' },
         messages: [

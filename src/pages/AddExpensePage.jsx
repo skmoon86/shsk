@@ -196,9 +196,21 @@ export default function AddExpensePage() {
       const blob   = await resizeImage(photo.file, { maxDim: 1024, quality: 0.8 })
       const base64 = await blobToBase64(blob)
 
-      // 2) Edge Function 호출
+      // 2) 기존 품목명 목록 조회
+      let knownItems = []
+      try {
+        const { data: rows } = await supabase
+          .from('expense_items')
+          .select('name, expense_id!inner(household_id)')
+          .eq('expense_id.household_id', household)
+        if (rows) {
+          knownItems = [...new Set(rows.map(r => r.name))].slice(0, 200)
+        }
+      } catch (_) {}
+
+      // 3) Edge Function 호출
       const { data, error } = await supabase.functions.invoke('parse-receipt', {
-        body: { image_base64: base64, mime: 'image/jpeg' },
+        body: { image_base64: base64, mime: 'image/jpeg', known_items: knownItems },
       })
       if (error) throw error
       if (!data?.ok) throw new Error(data?.error || '분석에 실패했어요')
